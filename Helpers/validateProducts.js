@@ -11,7 +11,7 @@ const productSchema = Joi.object({
     UnitsInStock:Joi.number().min(0).required().default(0),
     NSales:Joi.number().min(0).required().default(0),
     Image: Joi.string().default("defaultProduct.jpg"),
-    Orders:Joi.array().items(Joi.objectId()).default([])
+    Orders:Joi.array().items({id:Joi.objectId()}).default([])
 });
 
 const validateProduct = product => productSchema.validate(product, { abortEarly: false });
