@@ -2,9 +2,12 @@ const express = require('express');
 
 const Product = require('../Models/Products');
 const validateProducts = require('../Helpers/validateProducts');
+const validateObjectId = require('../Helpers/validateObjectId');
 
 const router = express.Router();
 
+
+//get all products
 router.get('/', async (req, res) => {
     const Products = await Product.find({});
     console.log(Products[0].Name);
@@ -12,10 +15,50 @@ router.get('/', async (req, res) => {
     res.send(Products);
 });
 
-router.post('/', async (req, res) => {
+//get product by id
+router.get('/:id', async (req, res) => {
+    const { id } = req.params;
+    const { error } = validateObjectId(id);
+    if (error) {
+        console.log("error in Id validatoin")
+        return res.status(400).send('Invalid Product Id');
+    }
+    const product = await Product.findById(id).populate('Category').populate('Orders.id');
+    if (!product) {
+        console.log("no product found");
+        return res.status(404).send('Product not found');
+    }
+    console.log("success");
+
+    res.send(product);
+});
+
+//get all orders in a product
+router.get('/:id/Orders', async (req, res) => {
+    const { id } = req.params;
+    const { error } = validateObjectId(id);
+    if (error) {
+        console.log("error in Id validatoin")
+        return res.status(400).send('Invalid Product Id');
+    }
+    const product = await Product.findById(id).populate('Category').populate('Orders.id');
+    if (!product) {
+        console.log("no product found");
+        return res.status(404).send('Product not found');
+    }
+    console.log("success");
+
+    res.send(product.Orders);
+});
+
+//insert product
+router.post('/', async (req, res) => {        
+    console.log(req.body)
+
     console.log("Post products")
     const { error } = validateProducts(req.body);
     if (error) {
+        console.log(req.body)
         console.log(error.details);
         return res.status(400).send("8alat ya zeft" + error.details);
     }
@@ -28,5 +71,55 @@ router.post('/', async (req, res) => {
 
     res.send(product);
 });
+
+//update product
+router.patch('/:id', async (req, res) => {
+    const product = await Product.findById(req.params.id);
+    if(product != 'undefined')
+    {
+        await Product.updateOne({"_id":req.params.id},{ $set: req.body });
+        res.status(200).send('Product Updated')
+    }
+    else
+    {
+        res.status(404).send('Product Not found')
+    }
+});
+
+//delete product
+router.delete('/:id', async (req, res) => {
+    const product = await Product.findById(req.params.id);
+    if(product != 'undefined')
+    {
+        await product.deleteOne({"_id":req.params.id});
+        res.status(200).send('Product Deleted')
+    }
+    else
+    {
+        res.status(404).send('Product Not found')
+    }
+});
+
+//insert Into orders
+// router.patch('/:id/Orders', async (req, res) => {
+//     const product = await Product.findById(req.params.id);
+//     if(product != 'undefined')
+//     {
+//         var original = product.Orders;
+//         console.log(original)
+//         original.push(req.body)
+//         console.log(original)
+//         await Product.updateOne({"_id":req.params.id},{ $set: original });
+//         console.log("should be updated !!");
+//         res.status(200).send('Product orders Updated')
+//     }
+//     else
+//     {
+//         res.status(404).send('Product Not found')
+//     }
+// });
+
+
+
 
 module.exports = router;

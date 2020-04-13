@@ -42,10 +42,13 @@ const ProductSchema = new mongoose.Schema({
         default:"default.jpg"
         },
    
-    Orders: [{
+    Orders: [
+        {
+            id:{
         type: mongoose.Schema.Types.ObjectId,
         required: true,
         ref: 'Order'
+        }
     }],
 },{ getters: true });
 
