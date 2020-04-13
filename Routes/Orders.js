@@ -1,6 +1,7 @@
 const express = require('express');
 
 const Order = require('../Models/Orders');
+const Product = require('../Models/Products');
 const validateOrders = require('../Helpers/validateOrders');
 
 const router = express.Router();
@@ -27,5 +28,58 @@ router.post('/', async (req, res) => {
 
     res.send(order);
 });
+//PATCH orders/id
+router.patch('/:id',async (req,res)=>{
+    //Step1: ValidateId
+       let {id} = req.params;
+       let  {error} = validateObjectId(id);
+       if(error)
+       {
+        console.log(error.details);
+           return res.status(400).send('Invalid id');
+       }
+       let order = await Order.findById(id);
+       if(order== null)
+       {
+            console.log(error.details);
+           return res.status(404).send('Order resource not found!');
+       }
+       order = await Order.findByIdAndUpdate(id,{
+           ...req.body
+       }
+       ,
+       {
+             new:true
+       })
+       
+       res.send(order).send("Successfully Updated!");
+    });
+    // DELETE orders/id
+    router.delete('/:id',async (req,res)=> {
+    
+       let {id} = req.params;
+       let  {error} = validateObjectId(id);
+       if(error)
+       {
+           
+           return res.status(400).send('Invalid id');
+       }
+       let order = await Order.findById(id);
+       if(order== null)
+       {
+           return res.status(404).send('Order resource not found!');
+       }
+       order = await Order.findByIdAndDelete(id);
+      
+        let products = await Product.find({'Orders.id': id});
+    
+       for (let i=0;i<products.length;i++)
+       {
+           await Product.findByIdAndDelete(products[i]._id);
+       }
+    
+       res.redirect('localhost:3000/orders/');
+    })
+    
 
 module.exports = router;
