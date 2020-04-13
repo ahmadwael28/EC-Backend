@@ -27,5 +27,21 @@ router.post('/', async (req, res) => {
 
     res.send(user);
 });
+router.patch('/:id',async (req,res)=>{
+    //step 1: validate id
+    let {id}=req.params;
+    const {error}=validateUsers(id);
+    if(error){
+        return res.status(400).send('Invalid UserID');
+    }
 
+    let user=await User.findById(req.params.id);
+
+    if(user==null){
+        return res.status(404).send('UserID not found');
+    }
+    user=await User.updateOne({"_id":req.params.id},{$set:req.body});
+    //user=await User.findByIdAndUpdate(id,{...req.body},{new:true});
+    res.send(user);
+});
 module.exports = router;
