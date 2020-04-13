@@ -32,6 +32,9 @@ router.patch('/:id',async (req,res)=>{
     let {id}=req.params;
     const {error}=validateUsers(id);
     if(error){
+        console.log(error.details);
+        console.log("error.details");
+
         return res.status(400).send('Invalid UserID');
     }
 
@@ -40,6 +43,13 @@ router.patch('/:id',async (req,res)=>{
     if(user==null){
         return res.status(404).send('UserID not found');
     }
+
+    // let orders= await Order.find({'User':user});
+
+    // for(let i=0;i<orders.length;i++)
+    // {
+    //     await Order.findByIdAndUpdate(orders[i]._id);
+    // }
     user=await User.updateOne({"_id":req.params.id},{$set:req.body});
     //user=await User.findByIdAndUpdate(id,{...req.body},{new:true});
     res.send(user);

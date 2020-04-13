@@ -8,7 +8,7 @@ const userSchema = Joi.object({
     Image: Joi.string().default("default.jpg"),
     Gender:Joi.string().valid('m','f'),
     Role:Joi.string().default("User"),
-    Orders:Joi.array().items(Joi.objectId()).default([])
+    Orders:Joi.array().items({id:Joi.objectId()}).default([])
 });
 
 const validateUser = user => userSchema.validate(user, { abortEarly: false });
