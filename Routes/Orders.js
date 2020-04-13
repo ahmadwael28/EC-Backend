@@ -3,6 +3,8 @@ const express = require('express');
 const Order = require('../Models/Orders');
 const Product = require('../Models/Products');
 const validateOrders = require('../Helpers/validateOrders');
+const validateObjectId = require('../Helpers/validateObjectId');
+
 
 const router = express.Router();
 
@@ -71,14 +73,16 @@ router.patch('/:id',async (req,res)=>{
        }
        order = await Order.findByIdAndDelete(id);
       
-        let products = await Product.find({'Orders.id': id});
+
+    //     let products = await Product.find({'Orders.id': id});
+
+    //    for (let i=0;i<products.length;i++)
+    //    {
+    //        await Product.findByIdAndDelete(products[i]._id);
+    //    }
     
-       for (let i=0;i<products.length;i++)
-       {
-           await Product.findByIdAndDelete(products[i]._id);
-       }
-    
-       res.redirect('localhost:3000/orders/');
+    res.send("Successfully Deleted!");
+
     })
     
 
