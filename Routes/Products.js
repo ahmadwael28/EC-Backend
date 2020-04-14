@@ -1,6 +1,7 @@
 const express = require('express');
 
 const Product = require('../Models/Products');
+const Order = require('../Models/Orders');
 const validateProducts = require('../Helpers/validateProducts');
 const validateObjectId = require('../Helpers/validateObjectId');
 
@@ -89,9 +90,31 @@ router.patch('/:id', async (req, res) => {
 //delete product
 router.delete('/:id', async (req, res) => {
     const product = await Product.findById(req.params.id);
-    if(product != 'undefined')
+    if(product)
     {
+        var orders = product.Orders;
+
+        for(let k=0;k<orders.length;k++)
+        {
+            let order = orders[k];
+            console.log(order.id);
+
+            let pOrder = await Order.findById(order.id);
+            for(let i = 0;i<pOrder.Products.length;i++)
+            {
+                if(pOrder.Products[i].Product == req.params.id)
+                {
+                    pOrder.Products.splice(i, 1);
+                    await Order.updateOne({"_id":pOrder._id},{ $set: pOrder});
+                    console.log("product removed from some order");
+                    break;
+                }
+            }
+        }
+
         await product.deleteOne({"_id":req.params.id});
+
+
         res.status(200).send('Product Deleted')
     }
     else
@@ -106,10 +129,9 @@ router.delete('/:id', async (req, res) => {
 //     if(product != 'undefined')
 //     {
 //         var original = product.Orders;
-//         console.log(original)
-//         original.push(req.body)
-//         console.log(original)
-//         await Product.updateOne({"_id":req.params.id},{ $set: original });
+//         console.log("adding order")
+//         product.Orders.push(req.body);
+//         await Product.updateOne({"_id":req.params.id},{ $set: product });
 //         console.log("should be updated !!");
 //         res.status(200).send('Product orders Updated')
 //     }
