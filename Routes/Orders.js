@@ -53,8 +53,21 @@ router.patch('/:id',async (req,res)=>{
        {
              new:true
        })
+       console.log(order);
+      let productsInOrder = order.Products;
+
+      for(let i=0;i<productsInOrder.length;i++)
+      {
+          console.log(productsInOrder[i]);
+           var obj =  await Product.findOne({"_id":productsInOrder[i].Product,"Orders.id":order._id});
+           if(obj==null)
+           {
+             await Product.findByIdAndUpdate(productsInOrder[i].Product, {$push: {"Orders": order._id}} );
+             
+           } 
+      }
        
-       res.send(order).send("Successfully Updated!");
+       res.send("Successfully Updated!");
     });
     // DELETE orders/id
     router.delete('/:id',async (req,res)=> {
@@ -74,14 +87,26 @@ router.patch('/:id',async (req,res)=>{
        order = await Order.findByIdAndDelete(id);
       
 
-    //     let products = await Product.find({'Orders.id': id});
-
-    //    for (let i=0;i<products.length;i++)
-    //    {
-    //        await Product.findByIdAndDelete(products[i]._id);
-    //    }
+     let products = await Product.find({'Orders.id': id});
+     console.log(products);
+     for (let i=0;i<products.length;i++)
+     {
+         Product.findByIdAndUpdate(
+            products[i]._id,
+            { $pull: { 'Orders': {  id: order._id } } },function(err,model){
+                if(err)
+                {
+                    console.log(err);
+                    res.send(err);
+                }
+                   res.json(model);
+            });
+            
+     }
     
-    res.send("Successfully Deleted!");
+        
+     
+       res.send("Successfully Deleted!");
 
     })
     
