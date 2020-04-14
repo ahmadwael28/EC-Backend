@@ -15,6 +15,7 @@ const OrderSchema = new mongoose.Schema({
     Status:{
         type:String,
         required:true,
+        default:"Pending"
     },
     // TotalPrice:{
     //     type:Number,
