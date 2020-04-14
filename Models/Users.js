@@ -28,6 +28,10 @@ const UserSchema =  new mongoose.Schema({
         required:true,
         default:"User"
     },
+    IsDeleted:{
+        type:Boolean,
+        default:false
+    },
     Orders: [{
         id:{
         type: mongoose.Schema.Types.ObjectId,
