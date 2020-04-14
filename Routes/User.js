@@ -47,39 +47,39 @@ router.patch('/:id',async (req,res)=>{
 
     user=await User.findByIdAndUpdate(id,{...req.body},{new:true});
     
-    let orders= await Order.find({'User':user});
+    // let orders= await Order.find({'User':user});
 
-    for(let i=0;i<orders.length;i++)
-    {
-        await Order.findByIdAndUpdate(orders[i]._id);
-    }
+    // for(let i=0;i<orders.length;i++)
+    // {
+    //     await Order.findByIdAndUpdate(orders[i]._id);
+    // }
     //user=await User.updateOne({"_id":req.params.id},{$set:req.body});
     console.log("User is Successfully Updated");
    res.send(user);
 });
 
-router.delete('/:id',async (req,res)=>{
-    //step 1: validate id
-    let {id}=req.params;
-    const {error}=validateObjectId(id);
-    if(error){
-        return res.status(400).send('Invalid UserID');
-    }
-    let user=await User.findById(id);
+// router.delete('/:id',async (req,res)=>{
+//     //step 1: validate id
+//     let {id}=req.params;
+//     const {error}=validateObjectId(id);
+//     if(error){
+//         return res.status(400).send('Invalid UserID');
+//     }
+//     let user=await User.findById(id);
 
-   if(user==null){
-       return res.status(404).send('UserID not found');
-   }
-   user=await User.findByIdAndDelete(id);
+//    if(user==null){
+//        return res.status(404).send('UserID not found');
+//    }
+//    user=await User.findByIdAndDelete(id);
 
-   let orders= await Order.find({'User':user});
+//    let orders= await Order.find({'User':user});
 
-    for(let i=0;i<orders.length;i++)
-    {
-        await Order.findByIdAndDelete(orders[i]._id);
-    }
+//     for(let i=0;i<orders.length;i++)
+//     {
+//         await Order.findByIdAndDelete(orders[i]._id);
+//     }
 
-    console.log("User is Successfully Deleted");
-   res.send(user);
-});
+//     console.log("User is Successfully Deleted");
+//    res.send(user);
+// });
 module.exports = router;
