@@ -6,7 +6,7 @@ const orderSchema = Joi.object({
     Date: Joi.date().default(Date.now()),
     Status: Joi.string().valid('Pending','Accepted',"Rejected","Canceled").default("Pending"),
     TotalPrice:Joi.number().min(0),
-    Products:Joi.array().items({Product:Joi.objectId(),Quantity:Joi.number()})
+    Products:Joi.array().items({Product:Joi.objectId(),Quantity:Joi.number().min(1).default(1)})
 });
 
 const validateOrder = order => orderSchema.validate(order, { abortEarly: false });

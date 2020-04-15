@@ -5,6 +5,7 @@ const CategoriesRouter = require('./Routes/Category');
 const UsersRouter = require('./Routes/User');
 const ProductsRouter = require('./Routes/Products');
 const OrdersRouter = require('./Routes/Orders');
+const ShoppingCartRouter = require('./Routes/ShoppingCart');
 
 const app = express();
 
@@ -25,6 +26,7 @@ app.use(express.json());
  app.use('/Users', UsersRouter);
  app.use('/Products', ProductsRouter);
  app.use('/Orders', OrdersRouter);
+ app.use('/ShoppingCart',ShoppingCartRouter)
 
  
 
