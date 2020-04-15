@@ -8,6 +8,7 @@ const validateObjectId = require('../Helpers/validateObjectId');
 
 const router = express.Router();
 
+//get all orders
 router.get('/', async (req, res) => {
     const Orders = await Order.find({}).populate('Products.Product');
     console.log(Orders[0].TotalPrice)

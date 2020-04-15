@@ -10,9 +10,7 @@ const router = express.Router();
 
 //get all products
 router.get('/', async (req, res) => {
-    const Products = await Product.find({});
-    console.log(Products[0].Name);
-    console.log(Products[0].NetPrice);
+    const Products = await Product.find({IsDeleted : false}).populate('Category');
     res.send(Products);
 });
 
@@ -28,6 +26,24 @@ router.get('/:id', async (req, res) => {
     if (!product) {
         console.log("no product found");
         return res.status(404).send('Product not found');
+    }
+    console.log("success");
+
+    res.send(product);
+});
+
+//get product by category
+router.get('/:Id/Category', async (req, res) => {
+    const { Id } = req.params;
+    const { error } = validateObjectId(Id);
+    if (error) {
+        console.log("error in Id validatoin")
+        return res.status(400).send('Invalid Product Id');
+    }
+    const product = await Product.find({Category : Id}).populate('Category').populate('Orders.id');
+    if (!product) {
+        console.log("no product found");
+        return res.status(404).send('no product found');
     }
     console.log("success");
 
@@ -92,28 +108,30 @@ router.delete('/:id', async (req, res) => {
     const product = await Product.findById(req.params.id);
     if(product)
     {
-        var orders = product.Orders;
+        //#region 
+        // var orders = product.Orders;
 
-        for(let k=0;k<orders.length;k++)
-        {
-            let order = orders[k];
-            console.log(order.id);
+        // for(let k=0;k<orders.length;k++)
+        // {
+        //     let order = orders[k];
+        //     console.log(order.id);
 
-            let pOrder = await Order.findById(order.id);
-            for(let i = 0;i<pOrder.Products.length;i++)
-            {
-                if(pOrder.Products[i].Product == req.params.id)
-                {
-                    pOrder.Products.splice(i, 1);
-                    await Order.updateOne({"_id":pOrder._id},{ $set: pOrder});
-                    console.log("product removed from some order");
-                    break;
-                }
-            }
-        }
+        //     let pOrder = await Order.findById(order.id);
+        //     for(let i = 0;i<pOrder.Products.length;i++)
+        //     {
+        //         if(pOrder.Products[i].Product == req.params.id)
+        //         {
+        //             pOrder.Products.splice(i, 1);
+        //             await Order.updateOne({"_id":pOrder._id},{ $set: pOrder});
+        //             console.log("product removed from some order");
+        //             break;
+        //         }
+        //     }
+        // }
+        //#endregion
 
-        await product.deleteOne({"_id":req.params.id});
-
+        product.IsDeleted = true;
+        await Product.updateOne({"_id":req.params.id},{ $set: product });
 
         res.status(200).send('Product Deleted')
     }

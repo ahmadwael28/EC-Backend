@@ -41,6 +41,12 @@ const ProductSchema = new mongoose.Schema({
         required:true,
         default:"default.jpg"
         },
+
+    IsDeleted:{
+        type:Boolean,
+        required:true,
+        default:false
+    },
    
     Orders: [
         {
