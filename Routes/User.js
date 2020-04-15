@@ -8,7 +8,7 @@ const validateObjectId = require('../Helpers/validateObjectId');
 const router = express.Router();
 
 router.get('/', async (req, res) => {
-    const Users = await User.find({});
+    const Users = await User.find({}).populate('Orders.id');
     res.send(Users);
 });
 
@@ -47,12 +47,16 @@ router.patch('/:id',async (req,res)=>{
 
     user=await User.findByIdAndUpdate(id,{...req.body},{new:true});
     
-    // let orders= await Order.find({'User':user});
+    let ordersOfUser= await user.Orders;
 
-    // for(let i=0;i<orders.length;i++)
-    // {
-    //     await Order.findByIdAndUpdate(orders[i]._id);
-    // }
+    for(let i=0;i<ordersOfUser.length;i++)
+    {
+      var obj = await Order.findOne({"_id":ordersOfUser[i].id,"Users.id":user._id});
+      if(obj==null)
+      {
+          await Order.findByIdAndUpdate(ordersOfUser[i].id,{$push:{"Users":user._id}});
+      }
+    }
     //user=await User.updateOne({"_id":req.params.id},{$set:req.body});
     console.log("User is Successfully Updated");
    res.send(user);

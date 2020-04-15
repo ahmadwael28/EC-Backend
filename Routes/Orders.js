@@ -53,7 +53,7 @@ router.patch('/:id',async (req,res)=>{
        {
              new:true
        })
-       console.log(order);
+       console.log(order._id);
       let productsInOrder = order.Products;
 
       for(let i=0;i<productsInOrder.length;i++)
@@ -63,7 +63,7 @@ router.patch('/:id',async (req,res)=>{
            if(obj==null)
            {
              await Product.findByIdAndUpdate(productsInOrder[i].Product, {$push: {"Orders": order._id}} );
-             
+             console.log(`"inside if"${order._id}`);
            } 
       }
        
