@@ -27,6 +27,7 @@ ShoppingCartSchema.virtual('TotalPrice').
         var Total = 0;
         this.Products.forEach(element => {
             Total += element.Product.NetPrice * element.Quantity;
+            console.log(Total);
         });
 
         return Total

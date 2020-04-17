@@ -1,6 +1,7 @@
 const express = require('express');
 
 const Order = require('../Models/Orders');
+const User = require('../Models/Users');
 const Product = require('../Models/Products');
 const validateOrders = require('../Helpers/validateOrders');
 const validateObjectId = require('../Helpers/validateObjectId');
@@ -94,6 +95,12 @@ router.post('/', async (req, res) => {
         }
     }
 
+    //mapping order in User's orders []
+    user= await User.findById(order.User);
+    user.Orders.push({"id":order._id});
+    user = await user.save();
+    order = await Order.findById(order._id).populate('Products.Product');
+    console.log(order.TotalPrice);
     res.send(order);
 });
 

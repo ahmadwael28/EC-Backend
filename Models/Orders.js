@@ -55,7 +55,11 @@ OrderSchema.virtual('TotalPrice').
     get(function(){
         var Total = 0;
         this.Products.forEach(element => {
+            console.log("Product:",element.Product);
+            console.log("NP:",element.Product.NetPrice);
+            console.log("Quantity:",element.Quantity);
             Total += element.Product.NetPrice * element.Quantity;
+            console.log(Total);
         });
 
         return Total
