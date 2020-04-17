@@ -49,10 +49,39 @@ router.get('/:userId/Products', async (req, res) => {
    );
     res.send(shoppingCart.Products);
 });
+//update cart 
+//PATCH orders/id
+router.patch('/:userId', async (req, res) => {
+    //Step1: ValidateId
+    let { userId } = req.params;
+    let { error } = validateObjectId(userId);
+    if (error) {
+        console.log(error.details);
+        return res.status(400).send('Invalid user Id');
+    }
+    shoppingCart = await ShoppingCart.findOne({User : userId}).populate('Products.Product');
+    if (!shoppingCart) {
+       
+        return res.status(404).send('Shopping cart resource not found!');
+    }
+    console.log("Before update",shoppingCart);
+    console.log(shoppingCart.User,shoppingCart.Products);
+    shoppingCart.Products = [];//reset
 
+    //shoppingCart = await shoppingCart.save();
 
+    shoppingCart.Products=req.body;
+   //shoppingCart.Products.push(...req.body);
+    shoppingCart = await shoppingCart.save();
+ 
+    console.log("After update",shoppingCart);
+  
+
+    res.status(200).send("Successfully Updated!");
+});
 //insert cart for testing
-router.post('/:userId', async (req, res) => {
+//#region
+ router.post('/:userId', async (req, res) => {
     const { userId } = req.params;
     const { error } = validateObjectId(userId);
     if (error) {
@@ -71,6 +100,8 @@ router.post('/:userId', async (req, res) => {
 
     res.status(200).send(shoppingCart);
 });
+//#endregion
+
 
 
 module.exports = router;
