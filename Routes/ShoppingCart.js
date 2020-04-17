@@ -142,7 +142,35 @@ router.get('/:userId/Checkout',async (req,res)=>{
     res.status(200).send(user);
 });
 
+//remove product from shopping cart
+router.delete('/:userId/RemoveProduct/:productId',async(req,res)=>{
+    let { userId,productId } = req.params;
+    let { userIderror } = validateObjectId(userId);
+    let { productIderror } = validateObjectId(productId);
+    if (userIderror || productIderror) {
+        console.log(userIderror.details);
+        return res.status(400).send('Invalid Ids');
+    }
+    shoppingCart=await ShoppingCart.findOne({User : userId}).populate('Products.Product');
+    shoppingCart.Products=shoppingCart.Products.filter(element=>element.Product._id!=productId);
+    shoppingCart=await shoppingCart.save();
+    res.status(200).send(shoppingCart);
+});
 
+//add product to cart
+router.patch('/:userId/AddProduct',async(req,res)=>{
+    let { userId } = req.params;
+    let { error} = validateObjectId(userId);
+    if (error) {
+        console.log(error.details);
+        return res.status(400).send('Invalid user ID');
+    }
+    let shoppingCart = await ShoppingCart.findOne({User: userId}).populate('Products.Product');
+    shoppingCart.Products.push(req.body);
+    shoppingCart = await shoppingCart.save();
+    res.status(200).send(shoppingCart);
+
+});
 //insert cart for testing
 //#region
  router.post('/:userId', async (req, res) => {
