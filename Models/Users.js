@@ -42,6 +42,7 @@ const UserSchema =  new mongoose.Schema({
     ShoppingCart: {
         type: mongoose.Schema.Types.ObjectId,
         required: true,
+        default:mongoose.Types.ObjectId(),
         ref: 'ShoppingCart'
     },
 });

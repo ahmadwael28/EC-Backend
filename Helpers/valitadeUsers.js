@@ -9,7 +9,7 @@ const userSchema = Joi.object({
     Gender:Joi.string().valid('m','f'),
     Role:Joi.string().default("User"),
     Orders:Joi.array().items({id:Joi.objectId()}).default([]),
-    ShoppingCart:Joi.objectId().required(),
+    ShoppingCart:Joi.objectId()
 });
 
 const validateUser = user => userSchema.validate(user, { abortEarly: false });

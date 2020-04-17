@@ -60,14 +60,14 @@ router.post('/:userId', async (req, res) => {
         return res.status(400).send('Invalid user Id');
     }
 
-    let shoppingCart = new ShoppingCart({
-        User: userId,
-        Products: [],
-        TotalPrice:0
-    });
+    // let shoppingCart = new ShoppingCart({
+    //     User: userId,
+    //     Products: [],
+    //     TotalPrice:0
+    // });
 
-    shoppingCart = await shoppingCart.save();
-    console.log("cart created")
+    // shoppingCart = await shoppingCart.save();
+    // console.log("cart created")
 
     res.status(200).send(shoppingCart);
 });
