@@ -61,6 +61,40 @@ router.patch('/:id',async (req,res)=>{
     console.log("User is Successfully Updated");
    res.send(user);
 });
+//get user's orders (view history)
+router.get('/:userId/Orders', async (req, res) => {
+    const { userId } = req.params;
+    const { error } = validateObjectId(userId);
+    if (error) {
+        console.log("error in Id validation")
+        return res.status(400).send('Invalid user Id');
+    }
+
+    let user = await User.findById(userId).populate('Orders.id');
+    //user.Orders = user.Orders.filter(o=>o.status=="Accepted" || o.status=="Pending")
+    res.status(200).send(user.Orders);
+});
+//get user by id
+router.get('/:userId', async (req, res) => {
+    const { userId } = req.params;
+    const { error } = validateObjectId(userId);
+    if (error) {
+        console.log("error in Id validation")
+        return res.status(400).send('Invalid user Id');
+    }
+
+    let user = await User.findById(userId).populate('Orders.id').populate('ShoppingCart');
+   
+    res.status(200).send(user);
+});
+//get specific order by id in  User's Orders
+router.get('/:userId/Orders/:orderId', async (req, res) => {
+    const { userId,orderId } = req.params;
+    const { error } = validateObjectId(userId);
+    if (error) {
+        console.log("error in Id validation")
+        return res.status(400).send('Invalid user Id');
+    }
 
 // router.delete('/:id',async (req,res)=>{
 //     //step 1: validate id
