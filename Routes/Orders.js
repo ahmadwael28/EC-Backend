@@ -71,7 +71,7 @@ router.post('/', async (req, res) => {
     for(let i = 0;i<order.Products.length;i++)
     {
         var product = await Product.findOne({ "_id": order.Products[i].Product});
-        if(product.IsDeleted)
+        if(product && product.IsDeleted)
         {
              order.Products.splice(i, 1);
             i--;

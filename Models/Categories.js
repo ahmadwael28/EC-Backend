@@ -7,11 +7,14 @@ const CategorySchema = new mongoose.Schema({
         required:true
     },
 
-    Products: [{
+    Products: [
+    { 
+        productId:{
         type: mongoose.Schema.Types.ObjectId,
         required: true,
         ref: 'Product'
-    }]
+       }
+  }]
 });
 
 const Category = mongoose.model('Category', CategorySchema);

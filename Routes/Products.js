@@ -1,6 +1,7 @@
 const express = require('express');
 
 const Product = require('../Models/Products');
+const Category = require('../Models/Categories');
 const Order = require('../Models/Orders');
 const validateProducts = require('../Helpers/validateProducts');
 const validateObjectId = require('../Helpers/validateObjectId');
@@ -85,6 +86,10 @@ router.post('/', async (req, res) => {
     });
 
     product = await product.save();
+
+    let category=await Category.findById(product.Category);
+    category.Products.push(product);
+    category=await category.save();
 
     res.send(product);
 });
