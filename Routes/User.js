@@ -42,6 +42,8 @@ router.post('/', async (req, res) => {
     user = await user.save();
     res.status(201).send(user);
 });
+
+//update user info
 router.patch('/:id',async (req,res)=>{
     //step 1: validate id
     let {id}=req.params;
@@ -75,6 +77,7 @@ router.patch('/:id',async (req,res)=>{
     console.log("User is Successfully Updated");
    res.send(user);
 });
+
 //get user's orders (view history)
 router.get('/:userId/Orders', async (req, res) => {
     const { userId } = req.params;
@@ -88,6 +91,7 @@ router.get('/:userId/Orders', async (req, res) => {
     //user.Orders = user.Orders.filter(o=>o.status=="Accepted" || o.status=="Pending")
     res.status(200).send(user.Orders);
 });
+
 //get user by id
 router.get('/:userId', async (req, res) => {
     const { userId } = req.params;
@@ -101,6 +105,7 @@ router.get('/:userId', async (req, res) => {
    
     res.status(200).send(user);
 });
+
 //get specific order by id in  User's Orders
 router.get('/:userId/Orders/:orderId', async (req, res) => {
     const { userId,orderId } = req.params;
@@ -123,6 +128,7 @@ router.get('/:userId/Orders/:orderId', async (req, res) => {
           res.status(404).send("Order resource is not found!");
   
 });
+
 // router.delete('/:id',async (req,res)=>{
 //     //step 1: validate id
 //     let {id}=req.params;
