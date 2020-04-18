@@ -99,6 +99,20 @@ router.patch('/:id', async (req, res) => {
     const product = await Product.findById(req.params.id);
     if(product != 'undefined')
     {
+        if(req.body.Category != undefined)
+        {
+            var currentCategory = product.Category;
+            var newCategory = req.body.Category;
+
+            var oldCategory = await Category.findById(currentCategory);
+            oldCategory.Products = oldCategory.Products.filter(p => p.productId.toString() != product._id.toString());
+            oldCategory = await oldCategory.save();
+
+            var newCategory = await Category.findById(newCategory);
+            newCategory.Products.push({"productId":product._id})
+            newCategory = await newCategory.save();
+        }
+
         await Product.updateOne({"_id":req.params.id},{ $set: req.body });
         res.status(200).send('Product Updated')
     }
@@ -146,24 +160,5 @@ router.delete('/:id', async (req, res) => {
     }
 });
 
-//#region 
-//insert Into orders
-// router.patch('/:id/Orders', async (req, res) => {
-//     const product = await Product.findById(req.params.id);
-//     if(product != 'undefined')
-//     {
-//         var original = product.Orders;
-//         console.log("adding order")
-//         product.Orders.push(req.body);
-//         await Product.updateOne({"_id":req.params.id},{ $set: product });
-//         console.log("should be updated !!");
-//         res.status(200).send('Product orders Updated')
-//     }
-//     else
-//     {
-//         res.status(404).send('Product Not found')
-//     }
-// });
-//#endregion
 
 module.exports = router;
