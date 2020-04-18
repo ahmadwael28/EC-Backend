@@ -26,7 +26,7 @@ app.use(express.json());
  app.use('/Users', UsersRouter);
  app.use('/Products', ProductsRouter);
  app.use('/Orders', OrdersRouter);
- app.use('/ShoppingCart',ShoppingCartRouter)
+ app.use('/ShoppingCarts',ShoppingCartRouter)
 
  
 

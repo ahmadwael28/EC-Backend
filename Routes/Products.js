@@ -88,7 +88,7 @@ router.post('/', async (req, res) => {
     product = await product.save();
 
     let category=await Category.findById(product.Category);
-    category.Products.push(product);
+    category.Products.push({"productId":product._id});
     category=await category.save();
 
     res.send(product);

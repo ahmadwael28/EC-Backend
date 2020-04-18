@@ -29,6 +29,7 @@ router.post('/', async (req, res) => {
     res.send(category);
 });
 
+//should be updated to "Update categoy name"
 router.patch('/:id',async (req,res)=>{
     const { id } = req.params;
     const { error } = validateObjectId(id);
@@ -39,22 +40,21 @@ router.patch('/:id',async (req,res)=>{
     let category = await Category.findById(id);
     if(!category)
     {
-  
         return res.status(404).send('Category resource is not found!');
     }
     category = await Category.findById(id).populate('Products.productId');
     category.Products = req.body;
     category = await category.save();
-    for(let i = 0;i<category.Products.length;i++)
-    {
-        var product = await Product.findOne({ "_id": category.Products[i].productId});
-        if(product && product.IsDeleted)
-        {
-             category.Products.splice(i, 1);
-             i--;
-        }
+    // for(let i = 0;i<category.Products.length;i++)
+    // {
+    //     var product = await Product.findOne({ "_id": category.Products[i].productId});
+    //     if(product && product.IsDeleted)
+    //     {
+    //          category.Products.splice(i, 1);
+    //          i--;
+    //     }
 
-    }
+    // }
     category = await category.save();
 
    
