@@ -71,8 +71,6 @@ router.get('/:id/Orders', async (req, res) => {
 
 //insert product
 router.post('/', async (req, res) => {        
-    console.log(req.body)
-
     console.log("Post products")
     const { error } = validateProducts(req.body);
     if (error) {

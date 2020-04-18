@@ -3,7 +3,7 @@ Joi.objectId = require('joi-objectid')(Joi);
 
 const productSchema = Joi.object({
     Category:Joi.objectId().required(),
-    Name: Joi.string().alphanum().required(),
+    Name: Joi.string().required(),
     Description: Joi.string().min(20).max(1000).required(),
     Price:Joi.number().min(0).required(),
     Promotion:Joi.number().min(0).max(100).default(0),
