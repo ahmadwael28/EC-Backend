@@ -5,6 +5,27 @@ const User = require('../Models/Users');
 const ShoppingCart = require('../Models/ShoppingCart');
 const validateUsers = require('../Helpers/valitadeUsers');
 const validateObjectId = require('../Helpers/validateObjectId');
+let fs = require('fs-extra');
+
+const multer = require('multer');
+//const upload = multer({dest: __dirname + '/uploads/images'});
+
+let upload = multer({
+    storage: multer.diskStorage({
+      destination: (req, file, callback) => {
+        let type = req.params.type;
+        let path = `./uploads/images`;
+        fs.mkdirsSync(path);
+        callback(null, path);
+      },
+      filename: (req, file, callback) => {
+        //originalname is the uploaded file's name with extn
+        callback(null, file.originalname);
+      }
+    })
+  });
+const path = require("path");
+
 
 const router = express.Router();
 
@@ -42,6 +63,20 @@ router.post('/', async (req, res) => {
     user = await user.save();
     res.status(201).send(user);
 });
+
+///tessssssssssssst multer
+router.post('/upload', upload.single('photo'), (req, res) => {
+    console.log("upload");
+    if(req.file) {
+        const targetPath = path.join(path.dirname(__dirname), "./uploads/images");
+        req.file.path = targetPath
+        req.file.filename = `${ req.file.filename}.png`;
+        console.log(targetPath);
+        res.json(req.file);
+    }
+    else throw 'error';
+});
+
 
 //update user info
 router.patch('/:id', async (req, res) => {
