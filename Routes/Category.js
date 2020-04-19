@@ -4,6 +4,7 @@ const Product = require('../Models/Products');
 const Category = require('../Models/Categories');
 const validateCategories = require('../Helpers/validateCategories');
 const validateObjectId = require('../Helpers/validateObjectId');
+const CategoryRepo=require('../Repositories/CategoryRepository');
 
 
 const router = express.Router();
@@ -17,14 +18,14 @@ router.post('/', async (req, res) => {
     console.log("Post category")
     const { error } = validateCategories(req.body);
     if (error) {
-        return res.status(400).send("8alat ya zeft" + error.details);
+        return res.status(400).send(error.details);
     }
 
     let category = new Category({
         ...req.body
     });
-
-    category = await category.save();
+    //repo
+    category = CategoryRepo.SaveCategory(category);
 
     res.send(category);
 });
@@ -38,13 +39,17 @@ router.get('/:id/:CategoryName',async (req,res)=>{
         console.log(error.details);
         return res.status(400).send('Invalid category Id');
     }
-    let category = await Category.findById(id);
+
+    //repo
+    let category = await CategoryRepo.GetCategoryById(id);
     if(!category)
     {
         return res.status(404).send('Category resource is not found!');
     }
+    console.log(category);
     category.CategoryName = CategoryName;
-    category = await category.save();
+    //repo
+    category = await CategoryRepo.SaveCategory(category);
     
     res.status(200).send(category);
 
