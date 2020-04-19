@@ -9,6 +9,7 @@ const validateProducts = require('../Helpers/validateProducts');
 const validateOrders = require('../Helpers/validateOrders');
 const validateShoppingCart = require('../Helpers/validateShoppingCart');
 const validateObjectId = require('../Helpers/validateObjectId');
+const ShoppingCartRepo=require('../Repositories/ShoppingCartRepository');
 
 const router = express.Router();
 
@@ -22,7 +23,7 @@ router.get('/:userId', async (req, res) => {
         return res.status(400).send('Invalid user Id');
     }
 
-    const shoppingCart = await ShoppingCart.find({ User: userId }).populate('Products.Product');
+    const shoppingCart = await ShoppingCartRepo.getShoppingCartByUserId(userId);
     res.send(shoppingCart);
 });
 
@@ -37,17 +38,9 @@ router.get('/:userId/Products', async (req, res) => {
 
     // const shoppingCart = await ShoppingCart.find({User : userId})
     // .populate('Products.Product')
-    const shoppingCart = await ShoppingCart.find({ User: userId }).populate(
-        {
-            path: 'Products.Product',
-            model: Product,
-            populate: {
-                path: 'Category',
-                model: Category
-            }
-        }
-    );
-    res.send(shoppingCart.Products);
+    const products = await ShoppingCartRepo.getProductsInShoppingCartByUserId(userId);
+    console.log("Routes",products);
+    res.send(products);
 });
 
 //increase product quantity in shopping cart
@@ -60,7 +53,7 @@ router.patch('/:userId/UpdateProduct/:productId/inc', async (req, res) => {
         console.log(error.details);
         return res.status(400).send('Invalid user Id');
     }
-    shoppingCart = await ShoppingCart.findOne({ User: userId }).populate('Products.Product');
+    shoppingCart = await ShoppingCartRepo.getShoppingCartByUserId(userId);
     if (!shoppingCart) {
 
         return res.status(404).send('Shopping cart resource not found!');
