@@ -71,5 +71,47 @@ module.exports={
         newCategory = await newCategory.save();
 
         return newCategory;
-    }
+    },
+     //ValidateProducts must be moved to ProductRepo
+    removeIsDeletedProducts: async function(container)
+    {
+        console.log(container);
+        for(let i = 0;i<container.Products.length;i++)
+        {
+            var product = await Product.findOne({ "_id": container.Products[i].Product});
+            if(product)
+            {
+                if(product.IsDeleted)
+                {
+                    container.Products.splice(i, 1);
+                    i--;
+                }
+                else if (product.UnitsInStock >= container.Products[i].Quantity) {
+                    product.UnitsInStock -= container.Products[i].Quantity;
+                }
+                else {
+                    //console.log("out of stock");
+                    container.Products.splice(i, 1);
+                    i--;
+                }
+            }
+
+        }
+        return container;
+        
+    },
+     //Should be invoked from Orders.js
+    AddOrderInProducts:async function(order)
+     {
+         for (let i = 0; i < order.Products.length; i++) {
+             //console.log(order.Products[i]);
+             var product = await Product.findOne({ "_id": order.Products[i].Product});
+ 
+             if(product)
+             {
+                 product.Orders.push({"OrderId":order._id})
+                 await Product.updateOne({"_id":product._id},{ $set: product });
+             }
+         }
+     }
 }

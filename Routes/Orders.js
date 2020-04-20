@@ -2,10 +2,12 @@ const express = require('express');
 
 const Order = require('../Models/Orders');
 const OrderRepository = require('../Repositories/OrderRepository');
+const ProductsRepo=require('../Repositories/ProductsRepository');
 const User = require('../Models/Users');
 const Product = require('../Models/Products');
 const validateOrders = require('../Helpers/validateOrders');
 const validateObjectId = require('../Helpers/validateObjectId');
+
 
 
 const router = express.Router();
@@ -70,7 +72,7 @@ router.post('/', async (req, res) => {
     console.log(order.Products)
     order = await order.save();
 
-    await OrderRepository.AddOrderInProducts(order);
+    await OrderRepository.notifyProductsOfOrders(order);
 
     //mapping order in User's orders []
     await OrderRepository.AddOrderInUser(order);

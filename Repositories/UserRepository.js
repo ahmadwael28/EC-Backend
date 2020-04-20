@@ -25,9 +25,16 @@ module.exports =
         return await User.findById(Id).populate('Orders.id').populate('ShoppingCart');
     },
 
+    AddOrderInUser:async function(order)
+    {
+        user= await User.findById(order.User);
+        user.Orders.push({"id":order._id});
+        user = await user.save();
+        return user;
+    },
 
     UpdateUser :async function(Id,obj) {
 
-        return await User.findByIdAndUpdate(Id, { ...req.body }, { new: true });
+        return await User.findByIdAndUpdate(Id, { ...req.body }, { new: true }).populate('Orders.id').populate('ShoppingCart');
     },
 }
