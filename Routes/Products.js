@@ -5,13 +5,14 @@ const Category = require('../Models/Categories');
 const Order = require('../Models/Orders');
 const validateProducts = require('../Helpers/validateProducts');
 const validateObjectId = require('../Helpers/validateObjectId');
+const ProductsRepo=require('../Repositories/ProductsRepository');
 
 const router = express.Router();
 
 
 //get all products
 router.get('/', async (req, res) => {
-    const Products = await Product.find({IsDeleted : false}).populate('Category');
+    const Products = await ProductsRepo.getAllProducts();
     res.send(Products);
 });
 
@@ -20,53 +21,41 @@ router.get('/:id', async (req, res) => {
     const { id } = req.params;
     const { error } = validateObjectId(id);
     if (error) {
-        console.log("error in Id validatoin")
         return res.status(400).send('Invalid Product Id');
     }
-    const product = await Product.findById(id).populate('Category').populate('Orders.id');
+    const product = await ProductsRepo.getProductById(id);
     if (!product) {
-        console.log("no product found");
         return res.status(404).send('Product not found');
     }
-    console.log("success");
-
     res.send(product);
 });
 
 //get product by category
-router.get('/:Id/Category', async (req, res) => {
-    const { Id } = req.params;
-    const { error } = validateObjectId(Id);
+router.get('/:categoryId/Category', async (req, res) => {
+    const { categoryId } = req.params;
+    const { error } = validateObjectId(categoryId);
     if (error) {
-        console.log("error in Id validatoin")
-        return res.status(400).send('Invalid Product Id');
+        return res.status(400).send('Invalid Category Id');
     }
-    const product = await Product.find({Category : Id}).populate('Category').populate('Orders.id');
+    const product = await ProductsRepo.getProductsByCategoryId(categoryId);
     if (!product) {
-        console.log("no product found");
         return res.status(404).send('no product found');
     }
-    console.log("success");
-
     res.send(product);
 });
 
 //get all orders in a product
-router.get('/:id/Orders', async (req, res) => {
-    const { id } = req.params;
-    const { error } = validateObjectId(id);
+router.get('/:productId/Orders', async (req, res) => {
+    const { productId } = req.params;
+    const { error } = validateObjectId(productId);
     if (error) {
-        console.log("error in Id validatoin")
         return res.status(400).send('Invalid Product Id');
     }
-    const product = await Product.findById(id).populate('Category').populate('Orders.id');
-    if (!product) {
-        console.log("no product found");
-        return res.status(404).send('Product not found');
+    const orders = await ProductsRepo.getProductOrders(productId);
+    if (!orders) {
+        return res.status(404).send('orders not found');
     }
-    console.log("success");
-
-    res.send(product.Orders);
+    res.send(orders);
 });
 
 //insert product
@@ -79,39 +68,41 @@ router.post('/', async (req, res) => {
         return res.status(400).send("8alat ya zeft" + error.details);
     }
 
-    let product = new Product({
-        ...req.body
-    });
+    product =await ProductsRepo.insertProduct(req.body);
 
-    product = await product.save();
-
-    let category=await Category.findById(product.Category);
-    category.Products.push({"productId":product._id});
-    category=await category.save();
+    category=await ProductsRepo.validateNewProductCategory(product);
 
     res.send(product);
 });
 
 //update product
 router.patch('/:id', async (req, res) => {
-    const product = await Product.findById(req.params.id);
-    if(product != 'undefined')
+    const product = await ProductsRepo.getProductById(req.params.id);
+    console.log("Route req.params.id ",product);
+   
+    if(product != undefined)
     {
         if(req.body.Category != undefined)
         {
-            var currentCategory = product.Category;
-            var newCategory = req.body.Category;
+            // var currentCategory = product.Category;
+            // var newCategory = req.body.Category;
 
-            var oldCategory = await Category.findById(currentCategory);
-            oldCategory.Products = oldCategory.Products.filter(p => p.productId.toString() != product._id.toString());
-            oldCategory = await oldCategory.save();
+            // var oldCategory = await Category.findById(currentCategory);
+            // oldCategory.Products = oldCategory.Products.filter(p => p.productId.toString() != product._id.toString());
+            // oldCategory = await oldCategory.save();
 
-            var newCategory = await Category.findById(newCategory);
-            newCategory.Products.push({"productId":product._id})
-            newCategory = await newCategory.save();
+            // var newCategory = await Category.findById(newCategory);
+            // newCategory.Products.push({"productId":product._id})
+            // newCategory = await newCategory.save();
+           console.log("Product",product);
+           console.log("Product old Category",product.Category._id);
+            newCategory=await ProductsRepo.updateProduct(product,req.body);
         }
 
+        //await Product.updateOne({"_id":req.params.id},{ $set: req.body });
+        
         await Product.updateOne({"_id":req.params.id},{ $set: req.body });
+        
         res.status(200).send('Product Updated')
     }
     else
@@ -122,34 +113,14 @@ router.patch('/:id', async (req, res) => {
 
 //delete product
 router.delete('/:id', async (req, res) => {
-    const product = await Product.findById(req.params.id);
-    if(product)
+    const product = await ProductsRepo.getProductById(req.params.id);
+    if(product && product.IsDeleted!=true)
     {
-        //#region 
-        // var orders = product.Orders;
 
-        // for(let k=0;k<orders.length;k++)
-        // {
-        //     let order = orders[k];
-        //     console.log(order.id);
+        // product.IsDeleted = true;
+        // await Product.updateOne({"_id":req.params.id},{ $set: product });
 
-        //     let pOrder = await Order.findById(order.id);
-        //     for(let i = 0;i<pOrder.Products.length;i++)
-        //     {
-        //         if(pOrder.Products[i].Product == req.params.id)
-        //         {
-        //             pOrder.Products.splice(i, 1);
-        //             await Order.updateOne({"_id":pOrder._id},{ $set: pOrder});
-        //             console.log("product removed from some order");
-        //             break;
-        //         }
-        //     }
-        // }
-        //#endregion
-
-        product.IsDeleted = true;
-        await Product.updateOne({"_id":req.params.id},{ $set: product });
-
+        ProductsRepo.deleteProduct(product);
         res.status(200).send('Product Deleted')
     }
     else

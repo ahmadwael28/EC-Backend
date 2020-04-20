@@ -129,7 +129,7 @@ router.get('/:userId/Checkout', async (req, res) => {
         console.log(error.details);
         return res.status(400).send('Invalid user Id');
     }
-    shoppingCart = await ShoppingCart.findOne({ User: userId }).populate('Products.Product');
+    shoppingCart = ShoppingCartRepo.getProductsInShoppingCartByUserId(userId);
 
     if (!shoppingCart) {
         return res.status(404).send('Shopping cart resource not found!');
