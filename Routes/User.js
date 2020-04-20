@@ -24,13 +24,15 @@ let upload = multer({
       }
     })
   });
-const path = require("path");
 
+const path = require("path");
+const UserRepo=require('../Repositories/UserRepository');
+const ShoppingCartRepo=require('../Repositories/ShoppingCartRepository');
 
 const router = express.Router();
 
 router.get('/', async (req, res) => {
-    const Users = await User.find({}).populate('Orders.id');
+    const Users = await UserRepo.GetAllUsers();
     res.send(Users);
 });
 
@@ -40,13 +42,14 @@ router.post('/', async (req, res) => {
     const { error } = validateUsers(req.body);
     if (error) {
         console.log(error.details);
-        return res.status(400).send("8alat ya zeft" + error.details);
+        return res.status(400).send(error.details);
     }
 
     let user = new User({
         ...req.body
     });
-    user = await user.save();
+
+    user = await UserRepo.SaveUser(user);
 
     let shoppingCart = new ShoppingCart({
         User: user._id,
@@ -54,13 +57,14 @@ router.post('/', async (req, res) => {
         TotalPrice: 0
     });
 
+    //need to be added to shopping cart repo
     shoppingCart = await shoppingCart.save();
     console.log("cart created");
     console.log(shoppingCart);
 
 
     user.ShoppingCart = shoppingCart._id;
-    user = await user.save();
+    user = await UserRepo.SaveUser(user);
     res.status(201).send(user);
 });
 
@@ -90,21 +94,23 @@ router.patch('/:id', async (req, res) => {
         return res.status(400).send('Invalid UserID');
     }
 
-    let user = await User.findById(req.params.id);
+    let user = await UserRepo.GetUserById(id);
 
     if (user == null) {
         return res.status(404).send('UserID not found');
     }
 
-    user = await User.findByIdAndUpdate(id, { ...req.body }, { new: true });
+    user = await UpdateUser(id,...req.body);
 
     let ordersOfUser = await user.Orders;
 
     for (let i = 0; i < ordersOfUser.length; i++) {
+        //Order Repo needed
         var obj = await Order.findOne({ "_id": ordersOfUser[i].id, "Users.id": user._id });
         if (obj == null) {
             await Order.findByIdAndUpdate(ordersOfUser[i].id, { $push: { "Users": user._id } });
         }
+        ///////////////////
     }
     //user=await User.updateOne({"_id":req.params.id},{$set:req.body});
     console.log("User is Successfully Updated");
@@ -120,7 +126,7 @@ router.get('/:userId/Orders', async (req, res) => {
         return res.status(400).send('Invalid user Id');
     }
 
-    let user = await User.findById(userId).populate('Orders.id');
+    let user = await GetUserById(userId);
     //user.Orders = user.Orders.filter(o=>o.status=="Accepted" || o.status=="Pending")
     res.status(200).send(user.Orders);
 });
@@ -134,7 +140,7 @@ router.get('/:userId', async (req, res) => {
         return res.status(400).send('Invalid user Id');
     }
 
-    let user = await User.findById(userId).populate('Orders.id').populate('ShoppingCart');
+    let user = await UserRepo.GetUserByIdWithShoppingCart(userId);
 
     res.status(200).send(user);
 });
@@ -148,10 +154,13 @@ router.get('/:userId/Orders/:orderId', async (req, res) => {
         return res.status(400).send('Invalid user Id');
     }
     console.log("Order Id :", orderId);
-    let user = await User.findById(userId);
+
+    let user = await UserRepo.GetUserById(userId);
+    
     var orderExists = user.Orders.find(o => o.id == orderId);//check status or not??
     console.log("OrderExists:", orderExists);
     if (orderExists) {
+        //Order repo
         let order = await Order.findOne({ "_id": orderId }).populate('Products.Product');
         console.log('Order Resource is found', order);
         res.status(200).send(order);
@@ -169,13 +178,13 @@ router.delete('/:id', async (req, res) => {
     if (error) {
         return res.status(400).send('Invalid UserID');
     }
-    let user = await User.findById(id);
+    let user = await GetUserById(id);
 
     if (user == null) {
         return res.status(404).send('UserID not found');
     }
     user.IsDeleted = true;
-    user = await user.save();
+    user = await UserRepo.SaveUser(user);
 
     console.log("User is Successfully Deleted");
     res.send(user);
