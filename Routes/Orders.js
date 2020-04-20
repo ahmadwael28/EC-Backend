@@ -1,6 +1,7 @@
 const express = require('express');
 
 const Order = require('../Models/Orders');
+const OrderRepository = require('../Repositories/OrderRepository');
 const User = require('../Models/Users');
 const Product = require('../Models/Products');
 const validateOrders = require('../Helpers/validateOrders');
@@ -11,8 +12,9 @@ const router = express.Router();
 
 //get all orders
 router.get('/', async (req, res) => {
-    const Orders = await Order.find({}).populate('Products.Product');
-    console.log(Orders[0].TotalPrice)
+   // const Orders = await Order.find({}).populate('Products.Product');
+    const Orders = await OrderRepository.getAllOrders();
+    //console.log(Orders[0].TotalPrice)
     res.send(Orders);
 });
 
@@ -24,7 +26,7 @@ router.get('/:id', async (req, res) => {
         console.log("error in Id validatoin")
         return res.status(400).send('Invalid order Id');
     }
-    const order = await Order.findById(id).populate('Products.Product')//.populate('Products.Quantity');
+    const order = await OrderRepository.getOrderById(id);
     if (!order) {
         console.log("order not found");
         return res.status(404).send('order not found');
@@ -43,7 +45,7 @@ router.get('/:id/Products', async (req, res) => {
         console.log("error in Id validatoin")
         return res.status(400).send('Invalid order Id');
     }
-    const order = await Order.findById(id).populate('Products.Product')//.populate('Products.Quantity');
+    const order = await OrderRepository.getOrderById(id);
     if (!order) {
         console.log("order not found");
         return res.status(404).send('order not found');
@@ -63,43 +65,16 @@ router.post('/', async (req, res) => {
         return res.status(400).send("8alat ya zeft" + error.details);
     }
 
-    let order = new Order({
-        ...req.body
-    });
-
-    
-    for(let i = 0;i<order.Products.length;i++)
-    {
-        var product = await Product.findOne({ "_id": order.Products[i].Product});
-        if(product && product.IsDeleted)
-        {
-             order.Products.splice(i, 1);
-            i--;
-        }
-
-    }
-
+    let order = await OrderRepository.addOrder(req.body);
+    order = await OrderRepository.removeIsDeletedProducts(order);
     console.log(order.Products)
     order = await order.save();
 
-    let productsInOrder = order.Products;
-
-    for (let i = 0; i < productsInOrder.length; i++) {
-        console.log(productsInOrder[i]);
-        var product = await Product.findOne({ "_id": productsInOrder[i].Product});
-
-        if(product)
-        {
-            product.Orders.push({"OrderId":order._id})
-            await Product.updateOne({"_id":product._id},{ $set: product });
-        }
-    }
+    await OrderRepository.AddOrderInProducts(order);
 
     //mapping order in User's orders []
-    user= await User.findById(order.User);
-    user.Orders.push({"id":order._id});
-    user = await user.save();
-    order = await Order.findById(order._id).populate('Products.Product');
+    await OrderRepository.AddOrderInUser(order);
+    order = await OrderRepository.getOrderById(order._id);//Return order with products populated
     console.log(order.TotalPrice);
     res.send(order);
 });
@@ -114,31 +89,23 @@ router.patch('/:id', async (req, res) => {
         console.log(error.details);
         return res.status(400).send('Invalid id');
     }
-    let order = await Order.findById(id);
-    if (order == null) {
+    let order = await OrderRepository.getOrderById(id);
+   
+    if(order != null)
+    {
+        if(req.body.Status != undefined)
+        {
+            order = await OrderRepository.UpdateOrderStatusById(id,req.body.Status);
+            res.send("Order's Status Successfully Updated!");
+        }
+    }
+    else
+    {
         console.log(error.details);
         return res.status(404).send('Order resource not found!');
     }
-    order = await Order.findByIdAndUpdate(id, {
-        ...req.body
-    }
-        ,
-        {
-            new: true
-        })
-    console.log(order._id);
-    let productsInOrder = order.Products;
-
-    for (let i = 0; i < productsInOrder.length; i++) {
-        console.log(productsInOrder[i]);
-        var obj = await Product.findOne({ "_id": productsInOrder[i].Product, "Orders.id": order._id });
-        if (obj == null) {
-            await Product.findByIdAndUpdate(productsInOrder[i].Product, { $push: { "Orders": order._id } });
-            console.log(`"inside if"${order._id}`);
-        }
-    }
-
-    res.send("Successfully Updated!");
+   
+    
 });
 
 
@@ -155,27 +122,18 @@ router.delete('/:id', async (req, res) => {
     if (order == null) {
         return res.status(404).send('Order resource not found!');
     }
-    order = await Order.findByIdAndDelete(id);
-
-
-    let products = await Product.find({ 'Orders.id': id });
-    console.log(products);
-    for (let i = 0; i < products.length; i++) {
-        Product.findByIdAndUpdate(
-            products[i]._id,
-            { $pull: { 'Orders': { id: order._id } } }, function (err, model) {
-                if (err) {
-                    console.log(err);
-                    res.send(err);
-                }
-                res.json(model);
-            });
-
+    else
+    {
+        order = await OrderRepository.CancelOrderById(id);
+        return res.status(200).send('Order is successfully canceled');
     }
 
 
 
-    res.send("Successfully Deleted!");
+   
+
+
+
 
 })
 
