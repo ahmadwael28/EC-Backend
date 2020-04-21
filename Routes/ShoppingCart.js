@@ -1,5 +1,5 @@
 const express = require('express');
-
+const AuthorizationMiddleware = require('../middlewares/authorization');
 const Product = require('../Models/Products');
 const User = require('../Models/Users');
 const Order = require('../Models/Orders');
@@ -232,14 +232,17 @@ router.delete('/:userId/RemoveProduct/:productId', async (req, res) => {
 });
 
 //add product to cart
-router.patch('/:userId/AddProduct', async (req, res) => {
-    let { userId } = req.params;
+router.patch('/AddProduct', AuthorizationMiddleware.verifyToken ,async (req, res) => {
+    console.log("Routes UserInfo",req.user);
+    let  userId  = req.user.id;
     let { error } = validateObjectId(userId);
     if (error) {
         console.log(error.details);
         return res.status(400).send('Invalid user ID');
     }
+    console.log("Routes UserID",userId);
     let shoppingCart = await ShoppingCart.findOne({ User: userId }).populate('Products.Product');
+    console.log("Routes", shoppingCart);
     //check req.body type
     //check if body is an object and contains needed properties or not
 

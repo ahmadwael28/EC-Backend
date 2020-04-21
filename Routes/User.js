@@ -1,6 +1,7 @@
 const express = require('express');
 const bcrypt = require('bcrypt');
-
+var jwt = require('jsonwebtoken');
+const SECRET_KEY = require('../config');
 
 const Order = require('../Models/Orders');
 const User = require('../Models/Users');
@@ -204,8 +205,16 @@ router.post('/Login',async(req,res)=>{
         bcrypt.compare(password,user.Password,async(err,isMatched)=>{
             if(isMatched)
             {
-               res.status(200).send("Signed In Successfully!");
-
+               const payload = {id:user._id,username:user.Username,role:user.Role};//holds user info/details
+               jwt.sign({user:payload},SECRET_KEY,{expiresIn:36000},(err,token)=>
+               {
+                   if(token)
+                     res.status(200).json({mess:"Signed In Successfully",tokenCreated:token});
+                   else
+                     res.status(200).json("Valid Password But error occurred while creating token! ")
+               });
+              
+             
             }
             else
             {
