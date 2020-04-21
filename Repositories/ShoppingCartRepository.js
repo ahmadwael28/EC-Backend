@@ -24,7 +24,7 @@ module.exports =
     },
     getShoppingCartProductsByUserId: async function (userId) {
         shoppingCart = await ShoppingCart.findOne({ User: userId }).populate('Products.Product');
-        console.log("Repo", shoppingCart.Products);
+        //console.log("Repo", shoppingCart.Products);
         return await shoppingCart;
     },
     ResetShoppingCart: async function (shoppingCart) {

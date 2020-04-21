@@ -75,7 +75,7 @@ module.exports={
      //ValidateProducts must be moved to ProductRepo
     removeIsDeletedProducts: async function(container)
     {
-        console.log(container);
+        //console.log(container);
         for(let i = 0;i<container.Products.length;i++)
         {
             var product = await Product.findOne({ "_id": container.Products[i].Product});

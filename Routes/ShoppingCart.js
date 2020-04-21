@@ -145,74 +145,25 @@ router.get('/:userId/Checkout', async (req, res) => {
     if (!shoppingCart) {
         return res.status(404).send('Shopping cart resource not found!');
     }
-    console.log('ShoppingCart TP:', shoppingCart.TotalPrice);
-    console.log("shoppingcart",shoppingCart);
+
     let order = {
         User: userId,
         Products: shoppingCart.Products
     };
 
-    //checking if any of the products in order is deleted
-    // for (let i = 0; i < order.Products.length; i++) {
-    //     //console.log("Product in order:", order.Products[i].Product);
-    //     var product = await Product.findOne({ _id: order.Products[i].Product });
-    //     //console.log("Product:", product);
-    //     //console.log("Net Price:", product.NetPrice);
-    //     if (product) {
-    //         if(product.IsDeleted)
-    //         {
-    //             order.Products.splice(i, 1);
-    //             i--;
-    //         }
-    //         else if(product.UnitsInStock >= order.Products[i].Quantity)
-    //         {
-    //             product.UnitsInStock -= order.Products[i].Quantity;
-    //         }
-    //         else
-    //         {
-    //             //console.log("out of stock");
-    //             order.Products.splice(i, 1);
-    //             i--;
-    //         }
-    //     }
-    // }
+    order=await OrdersRepo.addOrder(order);
+    order=await ProductsRepo.removeIsDeletedProducts(order);
 
-    console.log("shopping cart products",shoppingCart.Products);
-     order=await OrdersRepo.addOrder(order);
-     order=await ProductsRepo.removeIsDeletedProducts(order);
-
-
-    //console.log(order.Products)
     order = await order.save();
     order = await OrdersRepo.getOrderById(order._id);
-    //Order.findById(order._id).populate('Products.Product');
+    
+    await ShoppingCartRepo.ResetShoppingCart(shoppingCart);
 
-    //console.log("order is created", order);
+    OrdersRepo.notifyProductsOfOrders(order);
 
-    //reset the shopping cart
-     await ShoppingCartRepo.ResetShoppingCart(shoppingCart);
-
-    let productsInOrder = order.Products;
-
-
-    //to update the Orders array (OrderId) for each  product
-    // for (let i = 0; i < productsInOrder.length; i++) {
-    //     //console.log(productsInOrder[i]);
-    //     var product = await Product.findOne({ "_id": productsInOrder[i].Product });
-
-    //     if (product) {
-    //         product.Orders.push({ "OrderId": order._id })
-    //         await Product.updateOne({ "_id": product._id }, { $set: product });
-    //     }
-    // }
-
-    OrdersRepo.notifyProductsOfOrders(productsInOrder);
-
-    //console.log("Order Id:", order._id);
-    user = await UserRepo.notifyUserOfOrders(order);
+    user = await UserRepo.NotifyUserOfOrders(order);
     user = await UserRepo.UpdateUser(userId,user);
-    //User.findByIdAndUpdate(userId, user).populate('Orders.id').populate('ShoppingCart');
-    //console.log(order.TotalPrice);
+
     res.status(200).send(user);
 });
 
