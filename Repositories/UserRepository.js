@@ -3,6 +3,7 @@ const User = require('../Models/Users');
 const ShoppingCart = require('../Models/ShoppingCart');
 
 
+
 module.exports =
 {
 
@@ -12,6 +13,8 @@ module.exports =
     },
 
     SaveUser: async function(user) {
+    
+      
         return await user.save();
     },
 
@@ -37,4 +40,8 @@ module.exports =
 
         return await User.findByIdAndUpdate(Id, { ...req.body }, { new: true }).populate('Orders.id').populate('ShoppingCart');
     },
+    GetUserByUsername : async function(username)
+    {
+         return await User.findOne({Username:username}).populate('Orders.id').populate('ShoppingCart');
+    }
 }

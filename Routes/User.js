@@ -1,4 +1,6 @@
 const express = require('express');
+const bcrypt = require('bcrypt');
+
 
 const Order = require('../Models/Orders');
 const User = require('../Models/Users');
@@ -6,6 +8,7 @@ const ShoppingCart = require('../Models/ShoppingCart');
 const validateUsers = require('../Helpers/valitadeUsers');
 const validateObjectId = require('../Helpers/validateObjectId');
 let fs = require('fs-extra');
+
 
 const multer = require('multer');
 //const upload = multer({dest: __dirname + '/uploads/images'});
@@ -48,7 +51,8 @@ router.post('/', async (req, res) => {
     let user = new User({
         ...req.body
     });
-
+    
+    console.log("After Hash",user);
     user = await UserRepo.SaveUser(user);
 
     let shoppingCart = new ShoppingCart({
@@ -188,6 +192,32 @@ router.delete('/:id', async (req, res) => {
 
     console.log("User is Successfully Deleted");
     res.send(user);
+});
+
+//Signing In a user
+router.post('/Login',async(req,res)=>{
+    const username = req.body.Username;
+    const password = req.body.Password;
+    let user = await UserRepo.GetUserByUsername(username);
+    if(user)
+    {
+        bcrypt.compare(password,user.Password,async(err,isMatched)=>{
+            if(isMatched)
+            {
+               res.status(200).send("Signed In Successfully!");
+
+            }
+            else
+            {
+                return res.status(400).send("Invalid Password!");
+            }
+        });
+    }
+    else
+    {
+        return res.status(404).send("User not found!")
+    }
+
 });
 
 module.exports = router;

@@ -21,6 +21,7 @@ mongoose.connect(mongoURL, {
     .catch(err => console.log('Failed to connect to Mongodb,', err.message));
 
 app.use(express.json());
+app.use(express.urlencoded());//for form req body
 
  app.use('/Categories', CategoriesRouter);
  app.use('/Users', UsersRouter);
