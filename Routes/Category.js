@@ -31,7 +31,7 @@ router.post('/', async (req, res) => {
 });
 
 //Update Category name /id/newName
-router.get('/:id/:CategoryName',async (req,res)=>{
+router.get('/:id/:CategoryName/UpdateName',async (req,res)=>{
     const { id } = req.params;
     const { CategoryName } = req.params;
     const { error } = validateObjectId(id);
@@ -52,6 +52,30 @@ router.get('/:id/:CategoryName',async (req,res)=>{
     category = await CategoryRepo.SaveCategory(category);
     
     res.status(200).send(category);
+
+})
+
+router.get('/:id/GetAllProducts',async (req,res)=>{
+    const { id } = req.params;
+    const { CategoryName } = req.params;
+    const { error } = validateObjectId(id);
+    if (error) {
+        console.log(error.details);
+        return res.status(400).send('Invalid category Id');
+    }
+
+    //repo
+    let products = await CategoryRepo.GetAllProductsInCategory(id);
+    if(!products)
+    {
+        return res.status(404).send('Category resource is not found!');
+    }
+    //console.log(category);
+    //category.CategoryName = CategoryName;
+    //repo
+    //category = await CategoryRepo.SaveCategory(category);
+    
+    res.status(200).send(products);
 
 })
 
