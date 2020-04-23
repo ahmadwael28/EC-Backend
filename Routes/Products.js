@@ -12,6 +12,7 @@ const router = express.Router();
 
 //get all products
 router.get('/', async (req, res) => {
+    console.log("get all products");
     const Products = await ProductsRepo.getAllProducts();
     res.send(Products);
 });
