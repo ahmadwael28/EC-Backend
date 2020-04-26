@@ -38,10 +38,19 @@ module.exports =
 
     UpdateUser :async function(Id,obj) {
 
-        return await User.findByIdAndUpdate(Id, { ...req.body }, { new: true }).populate('Orders.id').populate('ShoppingCart');
+        return await User.findByIdAndUpdate(Id, obj, { new: true }).populate('Orders.id').populate('ShoppingCart');
     },
+
     GetUserByUsername : async function(username)
     {
          return await User.findOne({Username:username}).populate('Orders.id').populate('ShoppingCart');
+    },
+
+    NotifyUserOfOrders : async function(order)
+    {
+        var user = await User.findById(order.User).populate('Orders.id');
+        if(user)
+            user.Orders.push({"id":order._id});
+        return user;
     }
 }
