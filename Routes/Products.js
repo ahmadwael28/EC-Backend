@@ -59,6 +59,20 @@ router.get('/:productId/Orders', async (req, res) => {
     res.send(orders);
 });
 
+
+//get top selling products
+router.get('/top/Selling', async (req, res) => {
+    console.log("get top Selling products");
+    const Products = await Product.find({}).sort({NSales: -1}).limit(7).exec( 
+        function(err, products) {
+            console.log(products);
+            res.send(products);        
+        }
+    );
+    //res.send(Products);
+});
+
+
 //insert product
 router.post('/', async (req, res) => {        
     console.log("Post products")
