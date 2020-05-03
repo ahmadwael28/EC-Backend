@@ -1,6 +1,7 @@
 const express = require('express');
 const bcrypt = require('bcrypt');
-
+var jwt = require('jsonwebtoken');
+const SECRET_KEY = require('../config');
 
 const Order = require('../Models/Orders');
 const User = require('../Models/Users');
@@ -15,22 +16,22 @@ const multer = require('multer');
 
 let upload = multer({
     storage: multer.diskStorage({
-      destination: (req, file, callback) => {
-        let type = req.params.type;
-        let path = `./uploads/images`;
-        fs.mkdirsSync(path);
-        callback(null, path);
-      },
-      filename: (req, file, callback) => {
-        //originalname is the uploaded file's name with extn
-        callback(null, file.originalname);
-      }
+        destination: (req, file, callback) => {
+            let type = req.params.type;
+            let path = `./uploads/images`;
+            fs.mkdirsSync(path);
+            callback(null, path);
+        },
+        filename: (req, file, callback) => {
+            //originalname is the uploaded file's name with extn
+            callback(null, file.originalname);
+        }
     })
-  });
+});
 
 const path = require("path");
-const UserRepo=require('../Repositories/UserRepository');
-const ShoppingCartRepo=require('../Repositories/ShoppingCartRepository');
+const UserRepo = require('../Repositories/UserRepository');
+const ShoppingCartRepo = require('../Repositories/ShoppingCartRepository');
 
 const router = express.Router();
 
@@ -51,8 +52,8 @@ router.post('/', async (req, res) => {
     let user = new User({
         ...req.body
     });
-    
-    console.log("After Hash",user);
+
+    console.log("After Hash", user);
     user = await UserRepo.SaveUser(user);
 
     let shoppingCart = new ShoppingCart({
@@ -75,10 +76,10 @@ router.post('/', async (req, res) => {
 ///tessssssssssssst multer
 router.post('/upload', upload.single('photo'), (req, res) => {
     console.log("upload");
-    if(req.file) {
+    if (req.file) {
         const targetPath = path.join(path.dirname(__dirname), "./uploads/images");
         req.file.path = targetPath
-        req.file.filename = `${ req.file.filename}.png`;
+        req.file.filename = `${req.file.filename}.png`;
         console.log(targetPath);
         res.json(req.file);
     }
@@ -104,7 +105,7 @@ router.patch('/:id', async (req, res) => {
         return res.status(404).send('UserID not found');
     }
 
-    user = await UpdateUser(id,...req.body);
+    user = await UpdateUser(id, ...req.body);
 
     let ordersOfUser = await user.Orders;
 
@@ -160,7 +161,7 @@ router.get('/:userId/Orders/:orderId', async (req, res) => {
     console.log("Order Id :", orderId);
 
     let user = await UserRepo.GetUserById(userId);
-    
+
     var orderExists = user.Orders.find(o => o.id == orderId);//check status or not??
     console.log("OrderExists:", orderExists);
     if (orderExists) {
@@ -195,26 +196,44 @@ router.delete('/:id', async (req, res) => {
 });
 
 //Signing In a user
-router.post('/Login',async(req,res)=>{
+router.post('/Login', async (req, res) => {
+    console.log("server is hit");
     const username = req.body.Username;
     const password = req.body.Password;
     let user = await UserRepo.GetUserByUsername(username);
-    if(user)
-    {
-        bcrypt.compare(password,user.Password,async(err,isMatched)=>{
-            if(isMatched)
-            {
-               res.status(200).send("Signed In Successfully!");
+    if (user) {
+        bcrypt.compare(password, user.Password, async (err, isMatched) => {
+            if (isMatched) {
+                console.log("isMatched");
+                const payload = { id: user._id, username: user.Username, role: user.Role };//holds user info/details
+                console.log("payload", payload);
+
+                jwt.sign({ user: payload }, SECRET_KEY, { expiresIn: 36000 }, (err, token) => {
+                    console.log("da5al henaaaaa");
+                        if (err) 
+                            console.log("Error",err.details);
+                        if (token)
+                        { 
+                             console.log(" if (token)",token);
+                            res.status(200).json({ mess: "Signed In Successfully", tokenCreated: token ,_id:user._id});
+                            
+                        }
+                        else
+                        {
+                            console.log("else");
+
+                             res.status(200).json("Valid Password But error occurred while creating token! ");
+                        }
+                    });
+
 
             }
-            else
-            {
+            else {
                 return res.status(400).send("Invalid Password!");
             }
         });
     }
-    else
-    {
+    else {
         return res.status(404).send("User not found!")
     }
 
