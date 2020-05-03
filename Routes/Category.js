@@ -14,6 +14,12 @@ router.get('/', async (req, res) => {
     res.send(Categories);
 });
 
+router.get('/WithProducts', async (req, res) => {
+    console.log("get all categories with products");
+    const Categories = await Category.find({}).populate('Products.productId');
+    res.send(Categories);
+});
+
 router.post('/', async (req, res) => {
     console.log("Post category")
     const { error } = validateCategories(req.body);

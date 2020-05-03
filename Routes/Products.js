@@ -17,6 +17,24 @@ router.get('/', async (req, res) => {
     res.send(Products);
 });
 
+//get 3 random products
+router.get('/random/three', async (req, res) => {
+    console.log("get 3 random products");
+    const Products = await ProductsRepo.getAllProducts();
+    
+    var arr = [];
+    while(arr.length < 3){
+        var r = Math.floor(Math.random() * Products.length);
+        if(arr.indexOf(r) === -1) arr.push(r);
+    }
+    var response = [];
+    response.push(Products[arr[0]])
+    response.push(Products[arr[1]])
+    response.push(Products[arr[2]])
+    console.log(arr);
+    res.send(response);
+});
+
 //get product by id
 router.get('/:id', async (req, res) => {
     const { id } = req.params;
@@ -63,13 +81,18 @@ router.get('/:productId/Orders', async (req, res) => {
 //get top selling products
 router.get('/top/Selling', async (req, res) => {
     console.log("get top Selling products");
-    const Products = await Product.find({}).sort({NSales: -1}).limit(7).exec( 
+    await Product.find({}).sort({NSales: -1}).limit(7).exec( 
         function(err, products) {
-            console.log(products);
-            res.send(products);        
+            if(err)
+            {
+                console.log(err);
+                res.status(404).send("error")
+            }
+            console.log(products.length);
+
+            res.status(200).send(products);        
         }
     );
-    //res.send(Products);
 });
 
 
@@ -80,7 +103,7 @@ router.post('/', async (req, res) => {
     if (error) {
         console.log(req.body)
         console.log(error.details);
-        return res.status(400).send("8alat ya zeft" + error.details);
+        return res.status(400).send(error.details);
     }
 
     product =await ProductsRepo.insertProduct(req.body);
