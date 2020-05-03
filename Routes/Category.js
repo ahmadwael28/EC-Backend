@@ -14,6 +14,38 @@ router.get('/', async (req, res) => {
     res.send(Categories);
 });
 
+router.get('/WithProducts', async (req, res) => {
+    console.log("get all categories with products");
+    const Categories = await Category.find({}).populate('Products.productId');
+    res.send(Categories);
+});
+
+//search products within category
+router.get('/Search/:categoryId/:searchKey',async (req,res)=>{
+    const { categoryId } = req.params;
+    const { searchKey } = req.params;
+    const { error } = validateObjectId(categoryId);
+    if (error) {
+        console.log(error.details);
+        return res.status(400).send('Invalid category Id');
+    }
+
+    //repo
+    let products = await CategoryRepo.GetAllProductsInCategory(categoryId);
+    if(!products)
+    {
+        return res.status(404).send('Products resource is not found!');
+    }
+    
+    products = products.filter(product => product.productId.IsDeleted == false);    
+    console.log(products.length);
+    var filteredProducts = products.filter(product => product.productId.Name.toLowerCase().indexOf(searchKey.toLowerCase()) != -1);
+    console.log(filteredProducts.length);
+    
+    res.status(200).send(filteredProducts);
+
+})
+
 router.post('/', async (req, res) => {
     console.log("Post category")
     const { error } = validateCategories(req.body);
