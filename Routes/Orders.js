@@ -68,14 +68,14 @@ router.post('/', async (req, res) => {
     }
 
     let order = await OrderRepository.addOrder(req.body);
-    order = await OrderRepository.removeIsDeletedProducts(order);
+    order = await ProductsRepo.removeIsDeletedProducts(order);
     console.log(order.Products)
     order = await order.save();
 
     await OrderRepository.notifyProductsOfOrders(order);
 
     //mapping order in User's orders []
-    await OrderRepository.AddOrderInUser(order);
+    await OrderRepository.notifyUserOfOrders(order);
     order = await OrderRepository.getOrderById(order._id);//Return order with products populated
     console.log(order.TotalPrice);
     res.send(order);
