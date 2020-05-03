@@ -39,7 +39,21 @@ router.get('/', async (req, res) => {
     const Users = await UserRepo.GetAllUsers();
     res.send(Users);
 });
-
+//validation on username if already exists
+router.get('/ValidateUsername/:username', async (req, res) => {
+    let { username } = req.params;
+    if(username == null)
+      return res.status(400).send("Username is not sent");
+    res.send( await UserRepo.CheckIfUsernameExists(username));
+});
+//validation on email if already exists
+router.get('/ValidateEmail/:email', async (req, res) => {
+    let { email } = req.params;
+    if(email == null)
+      return res.status(400).send("Email is not sent");
+  
+    res.send( await UserRepo.CheckIfEmailExists(email));
+});
 //post new user with his new shopping cart
 router.post('/', async (req, res) => {
     console.log("Post user")
@@ -197,15 +211,15 @@ router.delete('/:id', async (req, res) => {
 
 //Signing In a user
 router.post('/Login',async(req,res)=>{
-    const username = req.body.Username;
+    const email = req.body.Email;
     const password = req.body.Password;
-    let user = await UserRepo.GetUserByUsername(username);
+    let user = await UserRepo.GetUserByEmail(email);
     if(user)
     {
         bcrypt.compare(password,user.Password,async(err,isMatched)=>{
             if(isMatched)
             {
-               const payload = {id:user._id,username:user.Username,role:user.Role};//holds user info/details
+               const payload = {id:user._id,email:user.Email,role:user.Role};//holds user info/details
                jwt.sign({user:payload},SECRET_KEY,{expiresIn:36000},(err,token)=>
                {
                    if(token)

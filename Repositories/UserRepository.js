@@ -41,11 +41,24 @@ module.exports =
         return await User.findByIdAndUpdate(Id, obj, { new: true }).populate('Orders.id').populate('ShoppingCart');
     },
 
-    GetUserByUsername : async function(username)
+    GetUserByEmail : async function(email)
     {
-         return await User.findOne({Username:username}).populate('Orders.id').populate('ShoppingCart');
+         return await User.findOne({Email:email}).populate('Orders.id').populate('ShoppingCart');
     },
-
+    CheckIfUsernameExists : async function(username)
+    {
+          const user = await User.findOne({Username: new RegExp('^'+username+'$', "i")});
+          if(user == null)
+             return false;
+          return true;
+    },
+    CheckIfEmailExists : async function(email)
+    {
+          const user = await User.findOne({Email: email});
+          if(user == null)
+             return false;
+          return true;
+    },
     NotifyUserOfOrders : async function(order)
     {
         var user = await User.findById(order.User).populate('Orders.id');
