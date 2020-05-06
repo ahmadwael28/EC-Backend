@@ -46,6 +46,45 @@ router.get('/Search/:categoryId/:searchKey',async (req,res)=>{
 
 })
 
+
+//search products within category
+router.get('/Page/:categoryId/:NP/:RP',async (req,res)=>{
+    console.log("get page");
+    const { categoryId } = req.params;
+    const { NP } = req.params;
+    const { RP } = req.params;
+    const { error } = validateObjectId(categoryId);
+
+    var NProductsPerPage = Number.parseInt(NP);
+    var RequiredPage = Number.parseInt(RP);
+
+    if (error) {
+        console.log(error.details);
+        return res.status(400).send('Invalid category Id');
+    }
+
+    //repo
+    let products = await CategoryRepo.GetAllProductsInCategory(categoryId);
+    if(!products)
+    {
+        return res.status(404).send('Products resource is not found!');
+    }
+    
+    products = products.filter(product => product.productId.IsDeleted == false);    
+    var subArray = [];
+    var startPos = (RequiredPage - 1) * NProductsPerPage;
+
+    if((startPos + NProductsPerPage) > products.length)
+        subArray = products.slice(startPos,startPos + (products.length - startPos));
+    else
+        subArray = products.slice(startPos,startPos + NProductsPerPage)
+    
+    
+    res.status(200).send(subArray);
+
+})
+
+
 router.post('/', async (req, res) => {
     console.log("Post category")
     const { error } = validateCategories(req.body);
