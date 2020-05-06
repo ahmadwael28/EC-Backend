@@ -18,8 +18,12 @@ const router = express.Router();
 
 
 //get shopping cart
-router.get('/:userId', async (req, res) => {
-    const { userId } = req.params;
+//DONE FOR TESTING
+router.get('/UserShoppingCart',AuthorizationMiddleware.verifyToken, async (req, res) => {
+    console.log("Routes UserShoppingCart",req.user);
+    const  userId  = req.user.id;
+    console.log("userId",userId);
+
     const { error } = validateObjectId(userId);
     if (error) {
         console.log("error in Id validatoin")
@@ -39,8 +43,13 @@ router.get('/:userId', async (req, res) => {
 });
 
 //get products in shopping cart
-router.get('/:userId/Products', async (req, res) => {
-    const { userId } = req.params;
+//DONE FOR TESTING
+router.get('/Products/ByUserToken',AuthorizationMiddleware.verifyToken, async (req, res) => {
+    console.log("Routes /Products/ByUserToken",req.user);
+
+    const  userId  = req.user.id;
+    console.log("userId",userId);
+
     const { error } = validateObjectId(userId);
     if (error) {
         console.log("error in Id validatoin")
@@ -53,11 +62,50 @@ router.get('/:userId/Products', async (req, res) => {
     console.log("Routes",shoppingCart);
     res.send(shoppingCart.Products);
 });
+//reset the shopping cart and set the order
+//DONE FOR TESTING
+router.get('/Products/ByUserToken/Checkout',AuthorizationMiddleware.verifyToken, async (req, res) => {
+    console.log("Routes /Products/ByUserToken/Checkout",req.user);
+    const  userId  = req.user.id;
+    console.log("userId",userId);
+    let { error } = validateObjectId(userId);
+    if (error) {
+        console.log(error.details);
+        return res.status(400).send('Invalid user Id');
+    }
+    shoppingCart =await ShoppingCartRepo.getShoppingCartProductsByUserId(userId);
 
+    if (!shoppingCart) {
+        return res.status(404).send('Shopping cart resource not found!');
+    }
+
+    let order = {
+        User: userId,
+        Products: shoppingCart.Products
+    };
+
+    order=await OrdersRepo.addOrder(order);
+    order=await ProductsRepo.removeIsDeletedProducts(order);
+
+    order = await order.save();
+    order = await OrdersRepo.getOrderById(order._id);
+    
+    await ShoppingCartRepo.ResetShoppingCart(shoppingCart);
+
+    OrdersRepo.notifyProductsOfOrders(order);
+
+    user = await UserRepo.NotifyUserOfOrders(order);
+    user = await UserRepo.UpdateUser(userId,user);
+
+    res.status(200).send(user);
+});
 //increase product quantity in shopping cart
-router.patch('/:userId/UpdateProduct/:productId/inc', async (req, res) => {
+//DONE FOR TESTING
+router.patch('/UpdateProduct/:productId/inc',AuthorizationMiddleware.verifyToken, async (req, res) => {
     //Step1: ValidateId
-    let { userId } = req.params;
+    console.log("Routes /UpdateProduct/:productId/inc",req.user);
+    const  userId  = req.user.id;
+    console.log("userId",userId);
     let { productId } = req.params;
     let { error } = validateObjectId(userId);
     if (error) {
@@ -94,9 +142,12 @@ router.patch('/:userId/UpdateProduct/:productId/inc', async (req, res) => {
 });
 
 //decrease product quantity in shopping cart
-router.patch('/:userId/UpdateProduct/:productId/dec', async (req, res) => {
+//DONE FOR TESTING
+router.patch('/UpdateProduct/:productId/dec',AuthorizationMiddleware.verifyToken, async (req, res) => {
     //Step1: ValidateId
-    let { userId } = req.params;
+    console.log("Routes /UpdateProduct/:productId/dec",req.user);
+    const  userId  = req.user.id;
+    console.log("userId",userId);
     let { productId } = req.params;
     let { error } = validateObjectId(userId);
     if (error) {
@@ -132,44 +183,13 @@ router.patch('/:userId/UpdateProduct/:productId/dec', async (req, res) => {
     res.status(200).send(shoppingCart);
 });
 
-//reset the shopping cart and set the order
-router.get('/:userId/Checkout', async (req, res) => {
-    let { userId } = req.params;
-    let { error } = validateObjectId(userId);
-    if (error) {
-        console.log(error.details);
-        return res.status(400).send('Invalid user Id');
-    }
-    shoppingCart =await ShoppingCartRepo.getShoppingCartProductsByUserId(userId);
-
-    if (!shoppingCart) {
-        return res.status(404).send('Shopping cart resource not found!');
-    }
-
-    let order = {
-        User: userId,
-        Products: shoppingCart.Products
-    };
-
-    order=await OrdersRepo.addOrder(order);
-    order=await ProductsRepo.removeIsDeletedProducts(order);
-
-    order = await order.save();
-    order = await OrdersRepo.getOrderById(order._id);
-    
-    await ShoppingCartRepo.ResetShoppingCart(shoppingCart);
-
-    OrdersRepo.notifyProductsOfOrders(order);
-
-    user = await UserRepo.NotifyUserOfOrders(order);
-    user = await UserRepo.UpdateUser(userId,user);
-
-    res.status(200).send(user);
-});
-
 //remove product from shopping cart
-router.delete('/:userId/RemoveProduct/:productId', async (req, res) => {
-    let { userId, productId } = req.params;
+//DONE FOR TESTING
+router.delete('/RemoveProduct/:productId',AuthorizationMiddleware.verifyToken, async (req, res) => {
+    console.log("Routes /RemoveProduct/:productId",req.user);
+    const  userId  = req.user.id;
+    console.log("userId",userId);
+    let { productId } = req.params;
     let { userIderror } = validateObjectId(userId);
     let { productIderror } = validateObjectId(productId);
     if (userIderror || productIderror) {
@@ -183,6 +203,7 @@ router.delete('/:userId/RemoveProduct/:productId', async (req, res) => {
 });
 
 //add product to cart
+//DONE FOR TESTING
 router.patch('/AddProduct', AuthorizationMiddleware.verifyToken ,async (req, res) => {
     console.log("Routes UserInfo",req.user);
     let  userId  = req.user.id;

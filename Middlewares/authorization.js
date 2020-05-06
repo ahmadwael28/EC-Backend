@@ -9,6 +9,7 @@ const verifyToken = (req, res, next) => {
   if (!token) 
       return res.status(401).send({ auth: false, message: 'Unauthorized, No token provided.' });
       //must redirect to login page for products page
+      console.log('token in middleware',token);
   jwt.verify( token, SECRET_KEY, ( err, decoded ) => {
 
     
@@ -16,9 +17,11 @@ const verifyToken = (req, res, next) => {
          res.status(500).send({ auth: false, message: 'Failed to authenticate token.' });
      
     }
-    else 
+    else {
         req.user = decoded.user;
 
+        console.log("req.user",req.user);
+    }
     next();//go to next middleware
 
   });
