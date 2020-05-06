@@ -48,7 +48,9 @@ router.get('/ValidateUsername/:username', async (req, res) => {
     let { username } = req.params;
     if(username == null)
       return res.status(400).send("Username is not sent");
-    res.send( await UserRepo.CheckIfUsernameExists(username));
+   
+    value = await UserRepo.CheckIfUsernameExists(username) ;
+    res.status(200).send({'exists':value});
 });
 //validation on email if already exists
 //not tested through fiddler
@@ -56,8 +58,8 @@ router.get('/ValidateEmail/:email', async (req, res) => {
     let { email } = req.params;
     if(email == null)
       return res.status(400).send("Email is not sent");
-  
-    res.send( await UserRepo.CheckIfEmailExists(email));
+    value = await UserRepo.CheckIfEmailExists(email) ;
+    res.status(200).send({'exists':value});
 });
 //post new user with his new shopping cart
 //not tested through fiddler

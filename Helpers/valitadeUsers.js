@@ -2,7 +2,7 @@ const Joi = require('@hapi/joi');
 Joi.objectId = require('joi-objectid')(Joi);
 
 const userSchema = Joi.object({
-    Name: Joi.string().regex(/^[\sa-zA-Z-]*$/).required(),
+    Name: Joi.string().regex(/^[\sa-zA-Z-]*$/),
     Email: Joi.string().email().regex(/[^@]+@[^\.]+\..+/).required(),
     Username: Joi.string().regex(/^[a-z0-9_-]{3,16}$/).required(),
     Password: Joi.string().min(8).max(16).required(),
