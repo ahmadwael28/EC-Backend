@@ -9,20 +9,20 @@ const validateProducts = require('../Helpers/validateProducts');
 const validateOrders = require('../Helpers/validateOrders');
 const validateShoppingCart = require('../Helpers/validateShoppingCart');
 const validateObjectId = require('../Helpers/validateObjectId');
-const ShoppingCartRepo=require('../Repositories/ShoppingCartRepository');
-const ProductsRepo=require('../Repositories/ProductsRepository');
-const OrdersRepo=require('../Repositories/OrderRepository');
-const UserRepo=require('../Repositories/UserRepository');
+const ShoppingCartRepo = require('../Repositories/ShoppingCartRepository');
+const ProductsRepo = require('../Repositories/ProductsRepository');
+const OrdersRepo = require('../Repositories/OrderRepository');
+const UserRepo = require('../Repositories/UserRepository');
 
 const router = express.Router();
 
 
 //get shopping cart
 //DONE FOR TESTING
-router.get('/UserShoppingCart',AuthorizationMiddleware.verifyToken, async (req, res) => {
-    console.log("Routes UserShoppingCart",req.user);
-    const  userId  = req.user.id;
-    console.log("userId",userId);
+router.get('/UserShoppingCart', AuthorizationMiddleware.verifyToken, async (req, res) => {
+    console.log("Routes UserShoppingCart", req.user);
+    const userId = req.user.id;
+    console.log("userId", userId);
 
     const { error } = validateObjectId(userId);
     if (error) {
@@ -31,24 +31,22 @@ router.get('/UserShoppingCart',AuthorizationMiddleware.verifyToken, async (req, 
     }
 
     const shoppingCart = await ShoppingCartRepo.getShoppingCartByUserId(userId);
-    console.log("Routes",shoppingCart);
-    if(shoppingCart)
-    {
+    console.log("Routes", shoppingCart);
+    if (shoppingCart) {
         res.send(shoppingCart);
     }
-    else
-    {
+    else {
         res.status(404).send("Shopping Cart Not found")
     }
 });
 
 //get products in shopping cart
 //DONE FOR TESTING
-router.get('/Products/ByUserToken',AuthorizationMiddleware.verifyToken, async (req, res) => {
-    console.log("Routes /Products/ByUserToken",req.user);
+router.get('/Products/ByUserToken', AuthorizationMiddleware.verifyToken, async (req, res) => {
+    console.log("Routes /Products/ByUserToken", req.user);
 
-    const  userId  = req.user.id;
-    console.log("userId",userId);
+    const userId = req.user.id;
+    console.log("userId", userId);
 
     const { error } = validateObjectId(userId);
     if (error) {
@@ -59,21 +57,21 @@ router.get('/Products/ByUserToken',AuthorizationMiddleware.verifyToken, async (r
     // const shoppingCart = await ShoppingCart.find({User : userId})
     // .populate('Products.Product')
     const shoppingCart = await ShoppingCartRepo.getShoppingCartByUserId(userId);
-    console.log("Routes",shoppingCart);
+    console.log("Routes", shoppingCart);
     res.send(shoppingCart.Products);
 });
 //reset the shopping cart and set the order
 //DONE FOR TESTING
-router.get('/Products/ByUserToken/Checkout',AuthorizationMiddleware.verifyToken, async (req, res) => {
-    console.log("Routes /Products/ByUserToken/Checkout",req.user);
-    const  userId  = req.user.id;
-    console.log("userId",userId);
+router.get('/Products/ByUserToken/Checkout', AuthorizationMiddleware.verifyToken, async (req, res) => {
+    console.log("Routes /Products/ByUserToken/Checkout", req.user);
+    const userId = req.user.id;
+    console.log("userId", userId);
     let { error } = validateObjectId(userId);
     if (error) {
         console.log(error.details);
         return res.status(400).send('Invalid user Id');
     }
-    shoppingCart =await ShoppingCartRepo.getShoppingCartProductsByUserId(userId);
+    shoppingCart = await ShoppingCartRepo.getShoppingCartProductsByUserId(userId);
 
     if (!shoppingCart) {
         return res.status(404).send('Shopping cart resource not found!');
@@ -84,28 +82,28 @@ router.get('/Products/ByUserToken/Checkout',AuthorizationMiddleware.verifyToken,
         Products: shoppingCart.Products
     };
 
-    order=await OrdersRepo.addOrder(order);
-    order=await ProductsRepo.removeIsDeletedProducts(order);
+    order = await OrdersRepo.addOrder(order);
+    order = await ProductsRepo.removeIsDeletedProducts(order);
 
     order = await order.save();
     order = await OrdersRepo.getOrderById(order._id);
-    
+
     await ShoppingCartRepo.ResetShoppingCart(shoppingCart);
 
     OrdersRepo.notifyProductsOfOrders(order);
 
     user = await UserRepo.NotifyUserOfOrders(order);
-    user = await UserRepo.UpdateUser(userId,user);
+    user = await UserRepo.UpdateUser(userId, user);
 
     res.status(200).send(user);
 });
 //increase product quantity in shopping cart
 //DONE FOR TESTING
-router.patch('/UpdateProduct/:productId/inc',AuthorizationMiddleware.verifyToken, async (req, res) => {
+router.patch('/UpdateProduct/:productId/inc', AuthorizationMiddleware.verifyToken, async (req, res) => {
     //Step1: ValidateId
-    console.log("Routes /UpdateProduct/:productId/inc",req.user);
-    const  userId  = req.user.id;
-    console.log("userId",userId);
+    console.log("Routes /UpdateProduct/:productId/inc", req.user);
+    const userId = req.user.id;
+    console.log("userId", userId);
     let { productId } = req.params;
     let { error } = validateObjectId(userId);
     if (error) {
@@ -118,23 +116,19 @@ router.patch('/UpdateProduct/:productId/inc',AuthorizationMiddleware.verifyToken
         return res.status(404).send('Shopping cart resource not found!');
     }
 
-    var product = shoppingCart.Products.find(elem=> elem.Product._id.toString() == productId.toString());
+    var product = shoppingCart.Products.find(elem => elem.Product._id.toString() == productId.toString());
 
-    if(product)
-    {
-        if(product.Product.UnitsInStock >= product.Quantity + 1)
-        {
+    if (product) {
+        if (product.Product.UnitsInStock >= product.Quantity + 1) {
             product.Quantity += 1;
             shoppingCart = await shoppingCart.save();
         }
-        else
-        {
+        else {
             return res.status(404).send('this product in out of stock!');
         }
 
     }
-    else
-    {
+    else {
         return res.status(404).send('No such product in shopping cart!');
     }
 
@@ -143,11 +137,11 @@ router.patch('/UpdateProduct/:productId/inc',AuthorizationMiddleware.verifyToken
 
 //decrease product quantity in shopping cart
 //DONE FOR TESTING
-router.patch('/UpdateProduct/:productId/dec',AuthorizationMiddleware.verifyToken, async (req, res) => {
+router.patch('/UpdateProduct/:productId/dec', AuthorizationMiddleware.verifyToken, async (req, res) => {
     //Step1: ValidateId
-    console.log("Routes /UpdateProduct/:productId/dec",req.user);
-    const  userId  = req.user.id;
-    console.log("userId",userId);
+    console.log("Routes /UpdateProduct/:productId/dec", req.user);
+    const userId = req.user.id;
+    console.log("userId", userId);
     let { productId } = req.params;
     let { error } = validateObjectId(userId);
     if (error) {
@@ -160,23 +154,19 @@ router.patch('/UpdateProduct/:productId/dec',AuthorizationMiddleware.verifyToken
         return res.status(404).send('Shopping cart resource not found!');
     }
 
-    var product = shoppingCart.Products.find(elem=> elem.Product._id.toString() == productId.toString());
+    var product = shoppingCart.Products.find(elem => elem.Product._id.toString() == productId.toString());
 
-    if(product)
-    {
-        if(product.Quantity -1 > 0)
-        {
+    if (product) {
+        if (product.Quantity - 1 > 0) {
             product.Quantity -= 1;
             shoppingCart = await shoppingCart.save();
         }
-        else
-        {
+        else {
             return res.status(404).send('cannot decrease product quantity less than 1!');
         }
 
     }
-    else
-    {
+    else {
         return res.status(404).send('No such product in shopping cart!');
     }
 
@@ -185,10 +175,10 @@ router.patch('/UpdateProduct/:productId/dec',AuthorizationMiddleware.verifyToken
 
 //remove product from shopping cart
 //DONE FOR TESTING
-router.delete('/RemoveProduct/:productId',AuthorizationMiddleware.verifyToken, async (req, res) => {
-    console.log("Routes /RemoveProduct/:productId",req.user);
-    const  userId  = req.user.id;
-    console.log("userId",userId);
+router.delete('/RemoveProduct/:productId', AuthorizationMiddleware.verifyToken, async (req, res) => {
+    console.log("Routes /RemoveProduct/:productId", req.user);
+    const userId = req.user.id;
+    console.log("userId", userId);
     let { productId } = req.params;
     let { userIderror } = validateObjectId(userId);
     let { productIderror } = validateObjectId(productId);
@@ -204,32 +194,43 @@ router.delete('/RemoveProduct/:productId',AuthorizationMiddleware.verifyToken, a
 
 //add product to cart
 //DONE FOR TESTING
-router.patch('/AddProduct', AuthorizationMiddleware.verifyToken ,async (req, res) => {
-    console.log("Routes UserInfo",req.user);
-    let  userId  = req.user.id;
+router.get('/AddProduct/:productId', AuthorizationMiddleware.verifyToken, async (req, res) => {
+    console.log("Routes UserInfo", req.user);
+    let userId = req.user.id;
+    let { productId } = req.params;
     let { error } = validateObjectId(userId);
     if (error) {
         console.log(error.details);
         return res.status(400).send('Invalid user ID');
     }
-    console.log("Routes UserID",userId);
-    let shoppingCart = await ShoppingCart.findOne({ User: userId }).populate('Products.Product');
+    console.log("Routes UserID", userId);
+    let shoppingCart = await ShoppingCartRepo.getShoppingCartByUserId(userId);
     console.log("Routes", shoppingCart);
     //check req.body type
     //check if body is an object and contains needed properties or not
+    if (!shoppingCart) {
 
-    var product = await Product.findOne({ _id: req.body.Product });
+        return res.status(404).send('Shopping cart resource not found!');
+    }
+    var product = await Product.findOne({ _id: productId });
 
     if (product && !product.IsDeleted) {
 
-        let obj =  shoppingCart.Products.find(elem=> elem.Product._id.toString() == product._id.toString());
+        let obj = shoppingCart.Products.find(elem => elem.Product._id.toString() == product._id.toString());
+        console.log("obj", obj);
         if (obj == undefined) {
-            shoppingCart.Products.push(req.body);
-            shoppingCart = await shoppingCart.save();
-            res.status(200).send(shoppingCart);
+           // if (product.UnitsInStock >= req.body + 1) {
+                shoppingCart.Products.push({"Product":product,"Quantity":1});
+                //shoppingCart.Products.push(req.body);
+                shoppingCart = await shoppingCart.save();
+                res.status(200).send(shoppingCart);
+            // }
+            // else
+            // {
+            //     res.status(400).send("No Sufficient Quantity")
+            // }
         }
-        else
-        {
+        else {
             res.status(400).send("Product already Exists in shopping cart")
         }
     }
