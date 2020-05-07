@@ -2,6 +2,7 @@ const express = require('express');
 const bcrypt = require('bcrypt');
 var jwt = require('jsonwebtoken');
 const SECRET_KEY = require('../config');
+const AuthorizationMiddleware = require('../middlewares/authorization');
 
 const Order = require('../Models/Orders');
 const User = require('../Models/Users');
@@ -35,11 +36,14 @@ const ShoppingCartRepo = require('../Repositories/ShoppingCartRepository');
 
 const router = express.Router();
 
+//when to be used??
+//even the admin hasn't the feature of seeing all users
 router.get('/', async (req, res) => {
     const Users = await UserRepo.GetAllUsers();
     res.send(Users);
 });
 //validation on username if already exists
+//not tested through fiddler
 router.get('/ValidateUsername/:username', async (req, res) => {
     let { username } = req.params;
     if(username == null)
@@ -49,6 +53,7 @@ router.get('/ValidateUsername/:username', async (req, res) => {
     res.status(200).send({'exists':value});
 });
 //validation on email if already exists
+//not tested through fiddler
 router.get('/ValidateEmail/:email', async (req, res) => {
     let { email } = req.params;
     if(email == null)
@@ -57,6 +62,7 @@ router.get('/ValidateEmail/:email', async (req, res) => {
     res.status(200).send({'exists':value});
 });
 //post new user with his new shopping cart
+//not tested through fiddler
 router.post('/', async (req, res) => {
     console.log("Post user")
     const { error } = validateUsers(req.body);
@@ -90,6 +96,7 @@ router.post('/', async (req, res) => {
 });
 
 ///tessssssssssssst multer
+//not tested through fiddler
 router.post('/upload', upload.single('photo'), (req, res) => {
     console.log("upload");
     if (req.file) {
@@ -106,9 +113,12 @@ router.post('/upload', upload.single('photo'), (req, res) => {
 
 
 //update user info
-router.patch('/:id', async (req, res) => {
+router.patch('/UpdateUser',AuthorizationMiddleware.verifyToken, async (req, res) => {
     //step 1: validate id
-    let { id } = req.params;
+    console.log("Routes UserInfo in update user",req.user);
+    let  id  = req.user.id;
+    console.log("Routes UserInfo id",id);
+
     const { error } = validateObjectId(id);
     if (error) {
         console.log(error.details);
@@ -123,7 +133,8 @@ router.patch('/:id', async (req, res) => {
         return res.status(404).send('UserID not found');
     }
 
-    user = await UpdateUser(id, ...req.body);
+    user = await UserRepo.UpdateUser(id, ...req.body);  //here there is a problemm!!!
+    //user = await UserRepo.UpdateUser(id,req.body);
 
     let ordersOfUser = await user.Orders;
 
@@ -141,8 +152,9 @@ router.patch('/:id', async (req, res) => {
 });
 
 //get user's orders (view history)
-router.get('/:userId/Orders', async (req, res) => {
-    const { userId } = req.params;
+router.get('/User/Orders',AuthorizationMiddleware.verifyToken, async (req, res) => {
+    console.log("Routes UserInfo",req.user);
+    const  userId  = req.user.id;
     const { error } = validateObjectId(userId);
     if (error) {
         console.log("error in Id validation")
@@ -154,9 +166,12 @@ router.get('/:userId/Orders', async (req, res) => {
     res.status(200).send(user.Orders);
 });
 
-//get user by id
-router.get('/:userId', async (req, res) => {
-    const { userId } = req.params;
+//get user by token
+router.get('/UserToken', AuthorizationMiddleware.verifyToken,async (req, res) => {
+    console.log("Routes UserInfo in get user by token",req.user);
+    const  userId  = req.user.id;
+    console.log("Routes UserInfo userId",userId);
+
     const { error } = validateObjectId(userId);
     if (error) {
         console.log("error in Id validation")
@@ -169,8 +184,10 @@ router.get('/:userId', async (req, res) => {
 });
 
 //get specific order by id in  User's Orders
-router.get('/:userId/Orders/:orderId', async (req, res) => {
-    const { userId, orderId } = req.params;
+router.get('/User/Orders/:orderId',AuthorizationMiddleware.verifyToken, async (req, res) => {
+    console.log("Routes UserInfo",req.user);
+    const  userId  = req.user.id;
+    const { orderId } = req.params;
     const { error } = validateObjectId(userId);
     if (error) {
         console.log("error in Id validation")
@@ -194,9 +211,10 @@ router.get('/:userId/Orders/:orderId', async (req, res) => {
 });
 
 //delete user
-router.delete('/:id', async (req, res) => {
+router.delete('/DeleteUser',AuthorizationMiddleware.verifyToken, async (req, res) => {
     //step 1: validate id
-    let { id } = req.params;
+    console.log("Routes UserInfo",req.user);
+    let { id } =req.user.id;
     const { error } = validateObjectId(id);
     if (error) {
         return res.status(400).send('Invalid UserID');
@@ -216,14 +234,16 @@ router.delete('/:id', async (req, res) => {
 //Signing In a user
 router.post('/Login', async (req, res) => {
     console.log("server is hit");
-    const username = req.body.Username;
+    const email = req.body.Email;
     const password = req.body.Password;
-    let user = await UserRepo.GetUserByUsername(username);
-    if (user) {
+    let user = await UserRepo.GetUserByEmail(email);
+    console.log("user",user);
+    if (user!=null) {
+        console.log("inside if");
         bcrypt.compare(password, user.Password, async (err, isMatched) => {
             if (isMatched) {
                 console.log("isMatched");
-                const payload = { id: user._id, username: user.Username, role: user.Role };//holds user info/details
+                const payload = { id: user._id, email: user.Email, role: user.Role };//holds user info/details
                 console.log("payload", payload);
 
                 jwt.sign({ user: payload }, SECRET_KEY, { expiresIn: 36000 }, (err, token) => {
@@ -233,7 +253,7 @@ router.post('/Login', async (req, res) => {
                         if (token)
                         { 
                              console.log(" if (token)",token);
-                            res.status(200).json({ mess: "Signed In Successfully", tokenCreated: token ,_id:user._id});
+                            res.status(200).json({ mess: "Signed In Successfully", tokenCreated: token});
                             
                         }
                         else
