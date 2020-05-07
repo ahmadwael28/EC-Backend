@@ -26,9 +26,8 @@ mongoose.connect(mongoURL, {
 app.use(cors());
 app.use('/static',express.static('./uploads/images'));
 app.use(express.json());
-app.use(bodyParser.urlencoded({
-    extended: false
-  }));
+app.use(express.urlencoded());//for form req body
+
  app.use('/Categories', CategoriesRouter);
  app.use('/Users', UsersRouter);
  app.use('/Products', ProductsRouter);
