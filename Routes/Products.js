@@ -77,6 +77,18 @@ router.get('/:productId/Orders', async (req, res) => {
     res.send(orders);
 });
 
+//search in products
+router.get('/Search/:searchKey', async (req, res) => {
+    const { searchKey } = req.params;
+    const products = await ProductsRepo.getAllProducts();;
+    if (!products) {
+        return res.status(404).send('No products found');
+    }
+    var filteredProducts = products.filter(product => product.Name.toLowerCase().indexOf(searchKey.toLowerCase()) != -1);
+
+
+    res.send(filteredProducts);
+});
 
 //get top selling products
 router.get('/top/Selling', async (req, res) => {
