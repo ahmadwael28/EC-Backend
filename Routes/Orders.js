@@ -57,6 +57,24 @@ router.get('/:id/Products', async (req, res) => {
     res.send(order.Products);
 });
 
+//get orders for a user
+router.get('/user/:id', async (req, res) => {
+    const { id } = req.params;
+    const { error } = validateObjectId(id);
+    if (error) {
+        console.log("error in Id validatoin")
+        return res.status(400).send('Invalid user Id');
+    }
+    const orders = await OrderRepository.getOrdersByUser(id);
+    if (!orders) {
+        console.log("no orders found");
+        return res.status(404).send('order not found');
+    }
+    console.log("success");
+
+    res.send(orders);
+});
+
 
 //insert Order
 router.post('/', async (req, res) => {
