@@ -122,13 +122,17 @@ router.patch('/UpdateProduct/:productId/inc', AuthorizationMiddleware.verifyToke
         if (product.Product.UnitsInStock >= product.Quantity + 1) {
             product.Quantity += 1;
             shoppingCart = await shoppingCart.save();
+            console.log("Successfully Updated!")
+
         }
         else {
+            console.log("this product in out of stock!")
             return res.status(404).send('this product in out of stock!');
         }
 
     }
     else {
+        console.log("No such product in shopping cart!")
         return res.status(404).send('No such product in shopping cart!');
     }
 
@@ -194,8 +198,8 @@ router.delete('/RemoveProduct/:productId', AuthorizationMiddleware.verifyToken, 
 
 //add product to cart
 //DONE FOR TESTING
-router.get('/AddProduct/:productId', AuthorizationMiddleware.verifyToken, async (req, res) => {
-    console.log("Routes UserInfo", req.user);
+router.get('/AddProduct/:productId', AuthorizationMiddleware.verifyToken, async(req, res) => {
+    console.log("Routes /AddProduct/:productId", req.user);
     let userId = req.user.id;
     let { productId } = req.params;
     let { error } = validateObjectId(userId);
