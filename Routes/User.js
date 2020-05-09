@@ -100,9 +100,11 @@ router.post('/', async (req, res) => {
 router.post('/upload', upload.single('photo'), (req, res) => {
     console.log("upload");
     if (req.file) {
+        console.log('File is Available!');
+        console.log(req.file);
         const targetPath = path.join(path.dirname(__dirname), "./uploads/images");
         req.file.path = targetPath
-        req.file.filename = `${req.file.filename}.png`;
+        //req.file.filename = `${req.file.filename}.png`;
         console.log(targetPath);
         res.json(req.file);
     }

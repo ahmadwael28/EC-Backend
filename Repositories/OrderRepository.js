@@ -18,6 +18,10 @@ module.exports =
     {
         return await Order.findById(orderID).populate('Products.Product')
     },
+    getOrdersByUser: async function(userId)
+    {
+        return await Order.find({User:userId}).populate('Products.Product')
+    },
     addOrder:async function(orderData)
     {
         let order = new Order({
