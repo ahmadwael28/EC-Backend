@@ -123,6 +123,7 @@ router.patch('/UpdateProduct/:productId/inc', AuthorizationMiddleware.verifyToke
             product.Quantity += 1;
             shoppingCart = await shoppingCart.save();
             console.log("Successfully Updated!")
+            res.status(200).send(shoppingCart);
 
         }
         else {
@@ -136,7 +137,6 @@ router.patch('/UpdateProduct/:productId/inc', AuthorizationMiddleware.verifyToke
         return res.status(404).send('No such product in shopping cart!');
     }
 
-    res.status(200).send("Successfully Updated!");
 });
 
 //decrease product quantity in shopping cart
@@ -164,6 +164,7 @@ router.patch('/UpdateProduct/:productId/dec', AuthorizationMiddleware.verifyToke
         if (product.Quantity - 1 > 0) {
             product.Quantity -= 1;
             shoppingCart = await shoppingCart.save();
+            res.status(200).send(shoppingCart);
         }
         else {
             return res.status(404).send('cannot decrease product quantity less than 1!');
@@ -174,7 +175,6 @@ router.patch('/UpdateProduct/:productId/dec', AuthorizationMiddleware.verifyToke
         return res.status(404).send('No such product in shopping cart!');
     }
 
-    res.status(200).send(shoppingCart);
 });
 
 //remove product from shopping cart
@@ -198,7 +198,7 @@ router.delete('/RemoveProduct/:productId', AuthorizationMiddleware.verifyToken, 
 
 //add product to cart
 //DONE FOR TESTING
-router.get('/AddProduct/:productId', AuthorizationMiddleware.verifyToken, async(req, res) => {
+router.get('/AddProduct/:productId', AuthorizationMiddleware.verifyToken, async (req, res) => {
     console.log("Routes /AddProduct/:productId", req.user);
     let userId = req.user.id;
     let { productId } = req.params;
@@ -223,11 +223,11 @@ router.get('/AddProduct/:productId', AuthorizationMiddleware.verifyToken, async(
         let obj = shoppingCart.Products.find(elem => elem.Product._id.toString() == product._id.toString());
         console.log("obj", obj);
         if (obj == undefined) {
-           // if (product.UnitsInStock >= req.body + 1) {
-                shoppingCart.Products.push({"Product":product,"Quantity":1});
-                //shoppingCart.Products.push(req.body);
-                shoppingCart = await shoppingCart.save();
-                res.status(200).send(shoppingCart);
+            // if (product.UnitsInStock >= req.body + 1) {
+            shoppingCart.Products.push({ "Product": product, "Quantity": 1 });
+            //shoppingCart.Products.push(req.body);
+            shoppingCart = await shoppingCart.save();
+            res.status(200).send(shoppingCart);
             // }
             // else
             // {
