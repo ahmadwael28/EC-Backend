@@ -193,7 +193,7 @@ router.delete('/RemoveProduct/:productId', AuthorizationMiddleware.verifyToken, 
     shoppingCart = await ShoppingCart.findOne({ User: userId }).populate('Products.Product');
     shoppingCart.Products = shoppingCart.Products.filter(element => element.Product._id != productId);
     shoppingCart = await shoppingCart.save();
-    res.status(200).send(shoppingCart);
+    res.status(200).send({"ShoppingCart":shoppingCart,"TotalPrice":shoppingCart.TotalPrice});
 });
 
 //add product to cart
