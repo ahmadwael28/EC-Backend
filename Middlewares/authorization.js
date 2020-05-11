@@ -20,7 +20,7 @@ const verifyToken = (req, res, next) => {
     else {
         req.user = decoded.user;
 
-        console.log("req.user",req.user);
+        console.log("req.user",req.user); 
     }
     next();//go to next middleware
 

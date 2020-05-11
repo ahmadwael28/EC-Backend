@@ -23,7 +23,6 @@ router.get('/UserShoppingCart', AuthorizationMiddleware.verifyToken, async (req,
     console.log("Routes UserShoppingCart", req.user);
     const userId = req.user.id;
     console.log("userId", userId);
-
     const { error } = validateObjectId(userId);
     if (error) {
         console.log("error in Id validatoin")
@@ -33,7 +32,8 @@ router.get('/UserShoppingCart', AuthorizationMiddleware.verifyToken, async (req,
     const shoppingCart = await ShoppingCartRepo.getShoppingCartByUserId(userId);
     console.log("Routes", shoppingCart);
     if (shoppingCart) {
-        res.send(shoppingCart);
+        console.log("TotalPrice",shoppingCart.TotalPrice);
+        res.send({"ShoppingCart":shoppingCart,"TotalPrice":shoppingCart.TotalPrice});
     }
     else {
         res.status(404).send("Shopping Cart Not found")

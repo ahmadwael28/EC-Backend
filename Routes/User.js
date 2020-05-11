@@ -92,6 +92,7 @@ router.post('/', async (req, res) => {
 
     user.ShoppingCart = shoppingCart._id;
     user = await UserRepo.SaveUser(user);
+    console.log("FullName",user.FullName);
     res.status(201).send(user);
 });
 
