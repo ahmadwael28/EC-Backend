@@ -6,7 +6,7 @@ const userSchema = Joi.object({
     LastName: Joi.string().regex(/^[a-zA-Z-]*$/),
     PhoneNumber: Joi.string().regex(/(00201)[0-9]{9}/),
     City: Joi.string().regex(/^[a-zA-Z-]*$/),
-    Street: Joi.string().regex(/^[\sa-zA-Z-0-9\.\,]*$/),
+    Street: Joi.string(),
     Zip: Joi.string().regex(/^[0-9]{4}/).max(4).min(4),
     Email: Joi.string().email().regex(/[^@]+@[^\.]+\..+/).required(),
     Username: Joi.string().regex(/^[a-z0-9_-]{3,16}$/).required(),
