@@ -11,7 +11,20 @@ module.exports =
     
     getAllOrders: async function ()
     {
-        return await Order.find({}).populate('Products.Product');
+        orders =  await Order.find({}).populate('Products.Product').populate('User');
+        console.log('Inside getAll Orders in order repo...');
+        let i=0;
+        orders.forEach(element => {
+           
+            console.log(`Order Element Num ${i+1}`,element);
+            i++;
+        });
+        ordersWithTP = new Array();
+       
+        orders.forEach(element => {
+            ordersWithTP.push({'Order':element,'TotalPrice':element.TotalPrice});
+        });
+        return ordersWithTP;
     },
 
     getOrderById: async function(orderID)

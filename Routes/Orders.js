@@ -17,6 +17,7 @@ router.get('/', async (req, res) => {
    // const Orders = await Order.find({}).populate('Products.Product');
     const Orders = await OrderRepository.getAllOrders();
     //console.log(Orders[0].TotalPrice)
+    
     res.send(Orders);
 });
 
