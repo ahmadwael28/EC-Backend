@@ -3,7 +3,27 @@ const bcrypt = require('bcrypt');
 
 const UserSchema =  new mongoose.Schema({
  
-    Name:{
+    FirstName:{
+        type: String,
+       
+    },
+    LastName:{
+        type: String,
+       
+    },
+    City:{
+        type: String,
+       
+    },
+    Street:{
+        type: String,
+       
+    },
+    Zip:{
+        type: String,
+       
+    },
+    PhoneNumber:{
         type: String,
        
     },
@@ -53,7 +73,12 @@ const UserSchema =  new mongoose.Schema({
         default:mongoose.Types.ObjectId(),
         ref: 'ShoppingCart'
     },
+},{ getters: true });
+
+UserSchema.virtual('FullName').get(function(){
+        return `${this.FirstName} ${this.LastName}`;
 });
+
 UserSchema.pre('save', function(next) {
     var user = this;
 

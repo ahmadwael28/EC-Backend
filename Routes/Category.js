@@ -150,4 +150,31 @@ router.get('/:id/GetAllProducts',async (req,res)=>{
 
 })
 
+router.get('/:id/GetProductsCount',async (req,res)=>{
+    const { id } = req.params;
+    const { CategoryName } = req.params;
+    const { error } = validateObjectId(id);
+    if (error) {
+        console.log(error.details);
+        return res.status(400).send('Invalid category Id');
+    }
+
+    //repo
+    let products = await CategoryRepo.GetAllProductsInCategory(id);
+    
+    products = products.filter(p => p.productId.IsDeleted == false);
+    if(!products)
+    {
+        return res.status(404).send('Category resource is not found!');
+    }
+    //console.log(category);
+    //category.CategoryName = CategoryName;
+    //repo
+    //category = await CategoryRepo.SaveCategory(category);
+    
+    console.log(products.length);
+    res.status(200).send({count:products.length});
+
+})
+
 module.exports = router;

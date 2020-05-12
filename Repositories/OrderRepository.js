@@ -20,7 +20,7 @@ module.exports =
     },
     getOrdersByUser: async function(userId)
     {
-        return await Order.find({User:userId}).populate('Products.Product')
+        return await Order.find({User:userId}).sort({Date: -1}).populate('Products.Product')
     },
     addOrder:async function(orderData)
     {
