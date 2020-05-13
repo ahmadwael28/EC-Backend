@@ -5,6 +5,8 @@ const Order = require('../Models/Orders');
 const Category = require('../Models/Categories');
 const ProductsRepo=require('../Repositories/ProductsRepository');
 const UserRepo=require('../Repositories/UserRepository');
+var moment = require('moment');
+
 
 module.exports =
 {
@@ -13,12 +15,23 @@ module.exports =
     {
         orders =  await Order.find({}).populate('Products.Product').populate('User');
         console.log('Inside getAll Orders in order repo...');
-        let i=0;
-        orders.forEach(element => {
+        
+        for(let i=0;i<orders.length;i++)
+         {
+             console.log("inside 1st loop",orders[i].Date)
+             var str = new String(orders[i].Date);
+             {}
+             const date = moment(str);
+             console.log("Moment...",moment(orders[i].Date.toString()).format("MM-DD-YYYY h hh"));
+             console.log("Date",orders[i].toString().split("GMT")[0]);
+             console.log("Date(before)",orders[i].Date.toString().split("GMT")[0]);
+             //orders[i].Date = d;////moment(str,"MM-DD-YYYY");//.format('LLL'); // January 14th 2013 2:08 PM
+             console.log("Date(after)",orders[i].Date);
+             console.log(`Order Element Num ${i+1}`,orders[i]);
+          
+         }
            
-            console.log(`Order Element Num ${i+1}`,element);
-            i++;
-        });
+      
         ordersWithTP = new Array();
        
         orders.forEach(element => {
