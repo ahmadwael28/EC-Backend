@@ -117,7 +117,9 @@ router.patch('/:id', async (req, res) => {
         if(req.body.Status != undefined)
         {
             order = await OrderRepository.UpdateOrderStatusById(id,req.body.Status);
-            res.send("Order's Status Successfully Updated!");
+            console.log("Order's Status Successfully Updated!");
+            res.send(order);
+
         }
     }
     else

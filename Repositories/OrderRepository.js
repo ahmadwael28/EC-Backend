@@ -14,6 +14,7 @@ module.exports =
     getAllOrders: async function ()
     {
         orders =  await Order.find({}).populate('Products.Product').populate('User');
+        orders = orders.filter(o=>o.Status!='Canceled');
         console.log('Inside getAll Orders in order repo...');
         
         for(let i=0;i<orders.length;i++)
