@@ -134,8 +134,8 @@ router.patch('/UpdateUser',AuthorizationMiddleware.verifyToken, async (req, res)
         return res.status(404).send('UserID not found');
     }
 
-    user = await UserRepo.UpdateUser(id, ...req.body);  //here there is a problemm!!!
-    //user = await UserRepo.UpdateUser(id,req.body);
+    //user = await UserRepo.UpdateUser(id, ...req.body);  //here there is a problemm!!!
+    user = await UserRepo.UpdateUser(id,req.body);
 
     let ordersOfUser = await user.Orders;
 
