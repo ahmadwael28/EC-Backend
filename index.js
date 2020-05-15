@@ -15,13 +15,13 @@ const app = express();
 const mongoURL = process.env.MONGO_URL || 'mongodb+srv://ahmadwael28:qwertz91@flybuydb-13pev.mongodb.net/flybuyDB?retryWrites=true&w=majority';
 const port = process.env.PORT || 3000;
 
-mongoose.connect(mongoURL, {
-    useNewUrlParser: true,
-    useUnifiedTopology: true,
-    useFindAndModify:false
-})
-    .then(() => console.log('Connected to MongoDB...'))
-    .catch(err => console.log('Failed to connect to Mongodb,', err.message));
+// mongoose.connect(mongoURL, {
+//     useNewUrlParser: true,
+//     useUnifiedTopology: true,
+//     useFindAndModify:false
+// })
+//     .then(() => console.log('Connected to MongoDB...'))
+//     .catch(err => console.log('Failed to connect to Mongodb,', err.message));
     
 app.use(cors());
 app.use('/static',express.static('./uploads/images'));
@@ -35,6 +35,14 @@ app.use(express.urlencoded());//for form req body
  app.use('/ShoppingCarts',ShoppingCartRouter)
 
  
+ mongoose.connect(mongoURL, {
+    useNewUrlParser: true, 
+    useUnifiedTopology: true})
+ .then(result => {
+    console.log('Connected to MongoDB...')
+    app.listen(port, () => console.log(`Server listens on port ${port}`));
+ })
+ .catch(err => {
+   console.log(err);
+ });
 
-
-app.listen(port, () => console.log(`Server listens on port ${port}`));
