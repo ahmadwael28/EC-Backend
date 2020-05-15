@@ -1,7 +1,7 @@
 const express = require('express');
 const mongoose = require('mongoose');
 
-const CategoriesRouter = require('./routes/Category');
+const CategoriesRouter = require('./routes/category');
 const UsersRouter = require('./routes/user');
 const ProductsRouter = require('./routes/Products');
 const OrdersRouter = require('./routes/Orders');
