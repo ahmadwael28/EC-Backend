@@ -2,7 +2,7 @@ const express = require('express');
 const bcrypt = require('bcrypt');
 var jwt = require('jsonwebtoken');
 const SECRET_KEY = require('../config');
-const AuthorizationMiddleware = require('../middlewares/authorization');
+const AuthorizationMiddleware = require('middlewares/authorization');
 
 const Order = require('../Models/Orders');
 const User = require('../Models/Users');
