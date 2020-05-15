@@ -1,6 +1,6 @@
-const express = require('express');
-const bcrypt = require('bcrypt');
-var jwt = require('jsonwebtoken');
+const express = require('./node_modules/express');
+const bcrypt = require('./node_modules/bcrypt');
+var jwt = require('./node_modules/jsonwebtoken');
 const SECRET_KEY = require('../config');
 const AuthorizationMiddleware = require('../middlewares/authorization');
 
@@ -9,10 +9,10 @@ const User = require('../Models/Users');
 const ShoppingCart = require('../Models/ShoppingCart');
 const validateUsers = require('../Helpers/valitadeUsers');
 const validateObjectId = require('../Helpers/validateObjectId');
-let fs = require('fs-extra');
+let fs = require('./node_modules/fs-extra');
 
 
-const multer = require('multer');
+const multer = require('./node_modules/multer');
 //const upload = multer({dest: __dirname + '/uploads/images'});
 
 let upload = multer({ 
