@@ -2,9 +2,9 @@ const express = require('express');
 const bcrypt = require('bcrypt');
 var jwt = require('jsonwebtoken');
 const SECRET_KEY = require('../config');
-const AuthorizationMiddleware = require('middlewares/authorization');
+const AuthorizationMiddleware = require('../middlewares/authorization');
 
-const Order = require('../Models/Orders');
+const Order = require('../Models/Orders'); 
 const User = require('../Models/Users');
 const ShoppingCart = require('../Models/ShoppingCart');
 const validateUsers = require('../Helpers/valitadeUsers');
@@ -15,7 +15,7 @@ let fs = require('fs-extra');
 const multer = require('multer');
 //const upload = multer({dest: __dirname + '/uploads/images'});
 
-let upload = multer({
+let upload = multer({ 
     storage: multer.diskStorage({
         destination: (req, file, callback) => {
             let type = req.params.type;
