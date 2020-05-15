@@ -1,4 +1,4 @@
-const express = require('./node_modules/express');
+const express = require('express');
 
 const Product = require('../Models/Products');
 const Category = require('../Models/Categories');

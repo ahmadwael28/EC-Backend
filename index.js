@@ -1,11 +1,11 @@
 const express = require('express');
 const mongoose = require('mongoose');
 
-const CategoriesRouter = require('./Routes/category');
-const UsersRouter = require('./Routes/user');
-const ProductsRouter = require('./Routes/products');
-const OrdersRouter = require('./Routes/orders');
-const ShoppingCartRouter = require('./Routes/shoppingcart');
+const CategoriesRouter = require('./routes/category');
+const UsersRouter = require('./routes/user');
+const ProductsRouter = require('./routes/products');
+const OrdersRouter = require('./routes/orders');
+const ShoppingCartRouter = require('./routes/shoppingcart');
 
 var cors = require('cors')
 
