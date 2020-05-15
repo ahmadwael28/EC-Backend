@@ -12,7 +12,7 @@ var cors = require('cors')
 
 const app = express();
 
-const mongoURL = process.env.MONGO_URL || 'mongodb+srv://ahmadwael28:qwertz91@flybuydb-13pev.mongodb.net/test?retryWrites=true&w=majority';
+const mongoURL = process.env.MONGO_URL || 'mongodb+srv://ahmadwael28:qwertz91@flybuydb-13pev.mongodb.net/flybuyDB?retryWrites=true&w=majority';
 const port = process.env.PORT || 3000;
 
 mongoose.connect(mongoURL, {
