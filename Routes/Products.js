@@ -93,7 +93,7 @@ router.get('/Search/:searchKey', async (req, res) => {
 //get top selling products
 router.get('/top/Selling', async (req, res) => {
     console.log("get top Selling products");
-    await Product.find({}).sort({NSales: -1}).limit(7).exec( 
+    await Product.find({"IsDeleted":false}).sort({NSales: -1}).limit(7).exec( 
         function(err, products) {
             if(err)
             {
